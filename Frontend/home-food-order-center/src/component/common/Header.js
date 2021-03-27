@@ -1,6 +1,7 @@
 import React from "react";
 import "../../style/css/common/header.css"
 import * as Icon from 'react-bootstrap-icons';
+import {Link} from "react-router-dom";
 
 export default class Header extends React.Component{
     //$("button").click(function(){
@@ -60,19 +61,19 @@ export default class Header extends React.Component{
                             {/*    <a className="nav-link" href="#">Contact</a>*/}
                             {/*</li>*/}
                             <li className="nav-item" >
-                                <a href="#" className="nav-link">
+                                <Link to="/auth/register" className="nav-link">
                                     <span className="pr-2">
                                          <Icon.PersonPlus size="20" />
                                     </span>
                                     Sign Up
-                                </a>
+                                </Link>
                             </li>
                             <li className="nav-item"  >
-                                <a href="#" className="nav-link">
+                                <Link to="/auth/login" className="nav-link">
                                      <span className="pr-2">
                                          <Icon.PersonCheck size="20" />
                                     </span>
-                                    Sign In</a>
+                                    Sign In</Link>
                             </li>
                         </ul>
                     </div>

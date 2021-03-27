@@ -1,36 +1,181 @@
 import React from "react";
 import '../../../style/css/Auth/Register/register.css';
+import backend from "../../../utils/backendUtils";
+import frontend from "../../../utils/frontendUtils";
+import constants from "../../../utils/constants";
+import {Link} from "react-router-dom";
+
 
 export default class Register extends React.Component {
+
+
+    constructor(props, context) {
+        super(props, context);
+        this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleChange = this.handleChange.bind(this);
+
+        this.state = {
+            username: null,
+            fName: null,
+            lName: null,
+            email: null,
+            phoneNumber: null,
+            password: null,
+            confirmPassword: null,
+        }
+    }
+
+    handleChange(event) {
+        let nameTarget = event.target.name;
+        let value = event.target.value;
+        switch (nameTarget) {
+            case constants.USERNAME_NAME:
+                this.setState((prevState) => {
+                    return {
+                        ...prevState,
+                        username: value
+                    }
+                })
+                break;
+            case constants.FIRST_NAME_NAME:
+                this.setState((prevState) => {
+                    return {
+                        ...prevState,
+                        fName: value
+                    }
+                })
+                break;
+            case constants.LAST_NAME_NAME:
+                this.setState((prevState) => {
+                    return {
+                        ...prevState,
+                        lName: value
+                    }
+                })
+                break;
+            case constants.EMAIL_NAME:
+                this.setState((prevState) => {
+                    return {
+                        ...prevState,
+                        email: value
+                    }
+                })
+                break;
+            case constants.PHONE_NUMBER_NAME:
+                this.setState((prevState) => {
+                    return {
+                        ...prevState,
+                        phoneNumber: value
+                    }
+                })
+                break;
+            case constants.PASSWORD_NAME:
+                this.setState((prevState) => {
+                    return {
+                        ...prevState,
+                        password: value
+                    }
+                })
+                break;
+            case constants.CONFIRM_PASSWORD_NAME:
+                this.setState((prevState) => {
+                    return {
+                        ...prevState,
+                        confirmPassword: value
+                    }
+                })
+
+                break;
+        }
+    }
+
+
+    handleSubmit(event) {
+        event.preventDefault();
+        let splitPhoneNumber = this.state.phoneNumber.split('');
+        let firstChar = 0;
+        for (const char of splitPhoneNumber) {
+            if ((firstChar === 0 & char !== '0') || (char < '0') || (char > '9')) {
+                debugger;
+                frontend.notifyError("Phone number must start with 0 and contains only numbers!")
+                return;
+            }
+
+            firstChar ++;
+        }
+
+        if (this.state.password !== this.state.confirmPassword) {
+            frontend.notifyError("Password doesn't match!")
+        } else {
+            backend.REQ_POST(backend.REGISTER_URL, this.state)
+                .then((result) => {
+                    frontend.notifyInfo("Register user success!")
+                    this.props.history.push(frontend.LOGIN_PATH);
+                }).catch((error) => error)
+        }
+    }
+
     render() {
+
         return (
-            <div className="signup-form">
-                <form method="post">
+            <div className="signup-form container">
+                <form onSubmit={this.handleSubmit}>
                     <h2>Sign UP</h2>
                     <p className="hint-text">Create your account. It's free and only takes a minute.</p>
-                    <div className="form-group">
-                        <div className="row">
-                            <div className="col">
-                                <input type="text" className="form-control" name="first_name" placeholder="First Name"
-                                       required="required"/>
-                            </div>
-                            <div className="col"><input type="text" className="form-control" name="last_name"
-                                                        placeholder="Last Name" required="required"/>
-                            </div>
+                    <div className="row">
+                        <div className="col">
+                            <input type="text" className="form-control" name={constants.USERNAME_NAME}
+                                   placeholder="Username"
+                                   maxLength='15' minLength='6' required='required'
+                                   onChange={this.handleChange}/>
                         </div>
                     </div>
                     <div className="form-group">
-                        <input type="email" className="form-control" name="email" placeholder="Email"
-                               required="required"/>
+                        <div className="row">
+                            <div className="col">
+                                <input type="text" className="form-control" name={constants.FIRST_NAME_NAME}
+                                       placeholder="First Name" minLength='4' maxLength='30'
+                                       required="required" onChange={this.handleChange}/>
+                            </div>
+                            <div className="col">
+                                <input type="text" className="form-control" name={constants.LAST_NAME_NAME}
+                                       placeholder="Last Name" minLength='4' maxLength='30'
+                                       required="required" onChange={this.handleChange}/>
+                            </div>
+                        </div>
                     </div>
+
                     <div className="form-group">
-                        <input type="password" className="form-control" name="password" placeholder="Password"
-                               required="required"/>
+                        <div className="row">
+                            <div className="col">
+                                <input type="email" className="form-control" name={constants.EMAIL_NAME}
+                                       placeholder="Email"
+                                       required="required" onChange={this.handleChange}/>
+                            </div>
+                            <div className="col">
+                                <input type="text" className="form-control" name={constants.PHONE_NUMBER_NAME}
+                                       placeholder="Phone number"
+                                       minLength='10' maxLength='10' required="required" onChange={this.handleChange}/>
+                            </div>
+                        </div>
                     </div>
+
+
                     <div className="form-group">
-                        <input type="password" className="form-control" name="confirm_password"
-                               placeholder="Confirm Password" required="required"/>
+                        <div className="row">
+                            <div className="col">
+                                <input type="password" className="form-control" name={constants.PASSWORD_NAME}
+                                       placeholder="Password" minLength='6' maxLength='20'
+                                       required="required" onChange={this.handleChange}/>
+                            </div>
+                            <div className="col">
+                                <input type="password" className="form-control" name={constants.CONFIRM_PASSWORD_NAME}
+                                       placeholder="Confirm Password" minLength='6' maxLength='20'
+                                       required="required" onChange={this.handleChange}/>
+                            </div>
+                        </div>
                     </div>
+
                     <div className="form-group">
                         <label className="form-check-label">
                             <div className="row">
@@ -38,7 +183,8 @@ export default class Register extends React.Component {
                                     <input type="checkbox" required="required"/>
                                 </div>
                                 <div className="col text-dark">
-                                    I accept the <a href="#">Terms of Use</a> &amp; <a href="#">Privacy Policy</a>
+                                    I accept the <span className="w3-text-green w3-hover-blue">Terms of Use</span> &amp;
+                                    <span className="w3-text-green w3-hover-blue">Privacy Policy</span>
                                 </div>
                             </div>
                         </label>
@@ -48,9 +194,11 @@ export default class Register extends React.Component {
                     </div>
                 </form>
                 <div className="text-center form-control text-dark">Already have an account?
-                    <a href="#" className="w3-hover-text-green text-info">Sign in</a>
+                    <Link to={frontend.LOGIN_PATH} className="w3-hover-text-green text-info">Sign in</Link>
                 </div>
             </div>
         );
     }
+
+
 }
