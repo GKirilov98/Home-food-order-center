@@ -58,7 +58,7 @@ public class ReceiptEntity extends BaseEntity {
         this.user = user;
     }
 
-    @Column(columnDefinition = "boolean default false")
+    @Column
     public boolean isPaid() {
         return isPaid;
     }

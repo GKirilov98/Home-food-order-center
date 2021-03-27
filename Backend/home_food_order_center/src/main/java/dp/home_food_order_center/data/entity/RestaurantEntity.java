@@ -74,7 +74,7 @@ public class RestaurantEntity extends BaseEntity {
         this.dateRegistration = dateRegistration;
     }
 
-    @Column(columnDefinition = "boolean default false")
+    @Column
     public boolean isAccepted() {
         return isAccepted;
     }

@@ -1,11 +1,15 @@
-package dp.home_food_order_center.data.model;
+package dp.home_food_order_center.data.view.auth;
 
-public class UserModel {
+/**
+ * Project: home_food_order_center
+ * Created by: G.Kirilov
+ * On: 3/26/2021 8:24 PM
+ */
+public class LoginUserView {
     private String username;
     private String password;
-    private String email;
 
-    public UserModel() {
+    public LoginUserView() {
     }
 
     public String getUsername() {
@@ -22,13 +26,5 @@ public class UserModel {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 }

@@ -13,7 +13,10 @@ public class UserEntity extends BaseEntity {
     private String username;
     private String password;
     private String email;
+    private String phoneNumber;
+    private String address;
     private Timestamp dateRegistration;
+    private String loggedId;
     private Set<RoleEntity> roles;
     private Set<ReceiptEntity> receipts;
     private Set<PaymentEntity> payments;
@@ -22,7 +25,7 @@ public class UserEntity extends BaseEntity {
     }
 
     @Lob
-    @Column(nullable = false)
+    @Column
     public Byte[] getImage() {
         return image;
     }
@@ -31,7 +34,7 @@ public class UserEntity extends BaseEntity {
         this.image = image;
     }
 
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false, unique = true)
     public String getUsername() {
         return username;
     }
@@ -58,6 +61,33 @@ public class UserEntity extends BaseEntity {
         this.email = email;
     }
 
+    @Column(nullable = false)
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    @Column
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Column(nullable = false)
+    public Timestamp getDateRegistration() {
+        return dateRegistration;
+    }
+
+    public void setDateRegistration(Timestamp dateRegistration) {
+        this.dateRegistration = dateRegistration;
+    }
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
@@ -70,15 +100,6 @@ public class UserEntity extends BaseEntity {
         this.roles = roles;
     }
 
-    @Column(nullable = false)
-    public Timestamp getDateRegistration() {
-        return dateRegistration;
-    }
-
-    public void setDateRegistration(Timestamp dateRegistration) {
-        this.dateRegistration = dateRegistration;
-    }
-
     @OneToMany(mappedBy = "user")
     public Set<ReceiptEntity> getReceipts() {
         return receipts;
@@ -88,12 +109,21 @@ public class UserEntity extends BaseEntity {
         this.receipts = receipts;
     }
 
-    @OneToMany(mappedBy="user")
+    @OneToMany(mappedBy = "user")
     public Set<PaymentEntity> getPayments() {
         return payments;
     }
 
     public void setPayments(Set<PaymentEntity> payments) {
         this.payments = payments;
+    }
+
+    @Column
+    public String getLoggedId() {
+        return loggedId;
+    }
+
+    public void setLoggedId(String loggedId) {
+        this.loggedId = loggedId;
     }
 }
