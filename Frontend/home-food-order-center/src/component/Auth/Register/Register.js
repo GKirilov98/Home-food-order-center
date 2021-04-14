@@ -1,9 +1,10 @@
 import React from "react";
-import '../../../style/css/Auth/Register/register.css';
 import backend from "../../../utils/backendUtils";
 import frontend from "../../../utils/frontendUtils";
 import constants from "../../../utils/constants";
 import {Link} from "react-router-dom";
+import {Loading} from "notiflix";
+import frontendUtils from "../../../utils/frontendUtils";
 
 
 export default class Register extends React.Component {
@@ -16,12 +17,18 @@ export default class Register extends React.Component {
 
         this.state = {
             username: null,
-            fName: null,
-            lName: null,
+            firstName: null,
+            lastName: null,
             email: null,
             phoneNumber: null,
             password: null,
             confirmPassword: null,
+        }
+    }
+
+    static getDerivedStateFromProps(props, state) {
+        if (sessionStorage.getItem(constants.USERNAME_KEY_NAME) != null) {
+            props.history.push(frontend.CATALOG_PATH);
         }
     }
 
@@ -41,7 +48,7 @@ export default class Register extends React.Component {
                 this.setState((prevState) => {
                     return {
                         ...prevState,
-                        fName: value
+                        firstName: value
                     }
                 })
                 break;
@@ -49,7 +56,7 @@ export default class Register extends React.Component {
                 this.setState((prevState) => {
                     return {
                         ...prevState,
-                        lName: value
+                        lastName: value
                     }
                 })
                 break;
@@ -84,7 +91,6 @@ export default class Register extends React.Component {
                         confirmPassword: value
                     }
                 })
-
                 break;
         }
     }
@@ -92,6 +98,7 @@ export default class Register extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
+        Loading.Standard('Loading...',);
         let splitPhoneNumber = this.state.phoneNumber.split('');
         let firstChar = 0;
         for (const char of splitPhoneNumber) {
@@ -108,10 +115,20 @@ export default class Register extends React.Component {
             frontend.notifyError("Password doesn't match!")
         } else {
             backend.REQ_POST(backend.REGISTER_URL, this.state)
-                .then((result) => {
-                    frontend.notifyInfo("Register user success!")
-                    this.props.history.push(frontend.LOGIN_PATH);
-                }).catch((error) => error)
+                .then(() => {
+                    Loading.Remove();
+                    frontend.notifyInfo("Потребителя е регистриран!")
+                    this.props.history.push(frontend.LOGIN_PATH);})
+                .catch(err => {
+                        console.log(err);
+                        Loading.Remove();
+                        if (err.message === '401') {
+                            sessionStorage.clear();
+                            frontendUtils.notifyError("Вашата сесия е истекла, моля влезте отново!");
+                            this.props.history.push(frontendUtils.LOGIN_PATH);
+                        }
+                    }
+                )
         }
     }
 
@@ -122,14 +139,17 @@ export default class Register extends React.Component {
                 <form onSubmit={this.handleSubmit}>
                     <h2>Sign UP</h2>
                     <p className="hint-text">Create your account. It's free and only takes a minute.</p>
-                    <div className="row">
-                        <div className="col">
-                            <input type="text" className="form-control" name={constants.USERNAME_NAME}
-                                   placeholder="Username"
-                                   maxLength='15' minLength='6' required='required'
-                                   onChange={this.handleChange}/>
+                    <div className="form-group">
+                        <div className="row">
+                            <div className="col ml-1 mr-1">
+                                <input type="text" className="form-control" name={constants.USERNAME_NAME}
+                                       placeholder="Username"
+                                       maxLength='15' minLength='6' required='required'
+                                       onChange={this.handleChange}/>
+                            </div>
                         </div>
                     </div>
+
                     <div className="form-group">
                         <div className="row">
                             <div className="col">

@@ -69,18 +69,17 @@
 /*    border-color: #FFFFFF;*/
 /*}*/
 
-form {
-    background-color: #FFFFFF;
+.form-login {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0 50px;
-    height: 100%;
-    text-align: center;
+    /*align-items: center;*/
+    /*justify-content: center;*/
+    /*flex-direction: column;*/
+    /*padding: 0 50px;*/
+    /*height: 100%;*/
+    /*text-align: center;*/
 }
 
-input {
+.input-login {
     background-color: #eee;
     border: none;
     padding: 12px 15px;
@@ -88,7 +87,7 @@ input {
     width: 100%;
 }
 
-.container {
+.login-container {
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),

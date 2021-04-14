@@ -1,6 +1,4 @@
 import React from "react";
-import "../../style/css/common/footer.css"
-
 export default class Footer extends React.Component {
     render() {
         return (
@@ -8,7 +6,7 @@ export default class Footer extends React.Component {
             // <div className="footer-basic">
             <div>
                 <div className="p-3">
-                    {/*<p className="copyright">Food center © 2021</p>*/}
+                    {/*<p className="copyright">{" "}</p>*/}
                 </div>
                 <footer>
                     <p className="copyright">Food center © 2021</p>

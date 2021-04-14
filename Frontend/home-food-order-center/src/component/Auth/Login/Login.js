@@ -1,9 +1,10 @@
 import React from "react";
-import '../../../style/css/Auth/Login/login.css';
 import {Link} from 'react-router-dom';
 import * as Icon from 'react-bootstrap-icons';
 import backend from "../../../utils/backendUtils";
 import constants from "../../../utils/constants";
+import frontend from "../../../utils/frontendUtils";
+import {Loading} from "notiflix";
 import frontendUtils from "../../../utils/frontendUtils";
 
 export default class Login extends React.Component {
@@ -17,6 +18,12 @@ export default class Login extends React.Component {
         this.state = {
             username: null,
             password: null
+        }
+    }
+
+    static getDerivedStateFromProps(props, state) {
+        if (sessionStorage.getItem(constants.USERNAME_KEY_NAME) != null) {
+            props.history.push(frontend.CATALOG_PATH);
         }
     }
 
@@ -45,16 +52,27 @@ export default class Login extends React.Component {
 
 
     handleSubmit(event) {
-        debugger
         event.preventDefault();
-            debugger
+        Loading.Standard('Loading...',);
         backend.REQ_POST(backend.LOGIN_URL, this.state)
             .then(data => data.json())
             .then((data) => {
-                sessionStorage.setItem(constants.TOKEN_KEY_NAME, data[0].token)
-                frontendUtils.notifyInfo("Login Success!")
-                debugger;
-                    // this.props.history.push(frontend.CATALOG_PATH);
+                sessionStorage.setItem(constants.TOKEN_KEY_NAME, data[0].accessToken)
+                sessionStorage.setItem(constants.USER_ROLES_KEY_NAME, data[0].roles)
+                sessionStorage.setItem(constants.USERNAME_KEY_NAME, data[0].username)
+                sessionStorage.setItem(constants.ID_KEY_NAME, data[0].id)
+                Loading.Remove();
+                frontend.notifyInfo("Влязохте успешно!")
+                this.props.history.push(frontend.CATALOG_PATH);
+            })
+            .catch(err => {
+                    console.log(err);
+                    Loading.Remove();
+                    if (err.message === '401') {
+                        sessionStorage.clear();
+                        frontendUtils.notifyError("Вашата сесия е истекла, моля влезте отново!");
+                        this.props.history.push(frontendUtils.LOGIN_PATH);
+                    }
                 }
             )
     }
@@ -62,13 +80,14 @@ export default class Login extends React.Component {
     render() {
         return (
 
-            <div className="container form-control text-dark login-form">
-                <form onSubmit={this.handleSubmit}>
+            <div className="container form-control text-dark login-form login-container">
+                <form onSubmit={this.handleSubmit} className="text-center">
                     <h1>Вход</h1>
-                    <input type="text" placeholder="Username" name={constants.USERNAME_NAME}
+                    <input className="form-control p-3 mb-3"
+                           type="text" placeholder="Username" name={constants.USERNAME_NAME}
                            maxLength='15' minLength='6' required='required'
                            onChange={this.handleChange}/>
-                    <input type="password" placeholder="Password"
+                    <input className="form-control p-3 mb-3" type="password" placeholder="Password"
                            name={constants.PASSWORD_NAME}
                            minLength='6' maxLength='20'
                            required="required" onChange={this.handleChange}/>
@@ -84,8 +103,13 @@ export default class Login extends React.Component {
                         </div>
                     </div>
 
-                    <Link to="todo" className=" w3-hover-border-blue">Забравена парола?</Link>
-                    <button type="submit" className="login-button">Sign in</button>
+                    <div className="col">
+                        <Link to="todo" className=" w3-hover-border-blue">Забравена парола?</Link>
+                    </div>
+                    <div className="col">
+                        <button type="submit" className="login-button">Sign in</button>
+                    </div>
+
                 </form>
             </div>
 
