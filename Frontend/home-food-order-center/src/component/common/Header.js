@@ -126,7 +126,9 @@ export default class Header extends React.Component {
                                     <li className="nav-item">
 
                                         <Link
-                                            to={frontendUtils.USER_PROFILE_PATH + sessionStorage.getItem(constants.ID_KEY_NAME)}
+                                            to={frontendUtils.USER_PROFILE_PATH +
+                                            // sessionStorage.getItem(constants.ID_KEY_NAME)}
+                                            sessionStorage.getItem(constants.USERNAME_KEY_NAME)}
                                             className="nav-link">
                                             <span className="pr-2">
                                              <Icon.PersonCircle size="20"/>

@@ -108,7 +108,7 @@ export default class UserProfile extends React.Component {
                                 </div>
                             </div>
                             <div className="col-md-2">
-                                <Link to={frontendUtils.USER_EDIT_PATH + this.state.user.id} className="btn btn-warning">Edit</Link>
+                                <Link to={frontendUtils.USER_EDIT_PATH + this.state.user.username} className="btn btn-warning">Edit</Link>
                             </div>
                         </div>
                         <div className="row pt-3 ml-5">

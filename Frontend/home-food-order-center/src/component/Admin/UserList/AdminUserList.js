@@ -196,11 +196,11 @@ export default class AdminUserList extends React.Component {
                                     <td>{user.email}</td>
                                     <td>{user.phoneNumber}</td>
                                     <td>
-                                        <Link to={frontendUtils.USER_EDIT_PATH + user.id}
+                                        <Link to={frontendUtils.USER_EDIT_PATH + user.username}
                                               className="btn btn-warning m-0">Edit</Link>
                                     </td>
                                     <td>
-                                        <Link to={frontendUtils.USER_PROFILE_PATH + user.id}
+                                        <Link to={frontendUtils.USER_PROFILE_PATH + user.username}
                                               className="btn btn-info m-0">View</Link>
                                     </td>
                                     {user.roles.includes(constants.ROLE_ADMIN) ? (

@@ -58,7 +58,6 @@ export default class App extends React.Component{
                             <Route path={frontendUtils.RECEIPT_VIEW_PATH +":id"} exact component={ReceiptView} />
                             <Route path={frontendUtils.USER_PROFILE_PATH + ":id"} exact component={UserProfile} />
                             <Route path={frontendUtils.USER_EDIT_PATH + ":id"} exact component={UserEdit} />
-                            <Route path={frontendUtils.USER_EDIT_PATH + ":id"} exact component={UserEdit} />
                             <Route path={frontendUtils.ABOUT_US} exact component={AboutUs} />
                             <Route component={GenericNotFound} />
                         </Switch>

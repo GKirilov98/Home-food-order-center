@@ -174,7 +174,7 @@ export default class UserEdit extends React.Component {
             email: this.state.email,
             phoneNumber: this.state.phoneNumber
         }
-        backend.REQ_POST(backend.USER_EDIT_PATH + this.state.user.id, objBody)
+        backend.REQ_POST(backend.USER_EDIT_PATH + this.state.user.username, objBody)
             .then(res => res.json())
             .then(res => {
                 frontendUtils.notifyInfo("Потребителя е променен успешно!")

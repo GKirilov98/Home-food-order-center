@@ -84,10 +84,10 @@ export default class Login extends React.Component {
                 <form onSubmit={this.handleSubmit} className="text-center">
                     <h1>Вход</h1>
                     <input className="form-control p-3 mb-3"
-                           type="text" placeholder="Username" name={constants.USERNAME_NAME}
+                           type="text" placeholder="Потребителско име" name={constants.USERNAME_NAME}
                            maxLength='15' minLength='6' required='required'
                            onChange={this.handleChange}/>
-                    <input className="form-control p-3 mb-3" type="password" placeholder="Password"
+                    <input className="form-control p-3 mb-3" type="password" placeholder="Парола"
                            name={constants.PASSWORD_NAME}
                            minLength='6' maxLength='20'
                            required="required" onChange={this.handleChange}/>
@@ -107,7 +107,7 @@ export default class Login extends React.Component {
                         <Link to="todo" className=" w3-hover-border-blue">Забравена парола?</Link>
                     </div>
                     <div className="col">
-                        <button type="submit" className="login-button">Sign in</button>
+                        <button type="submit" className="login-button">Влез</button>
                     </div>
 
                 </form>

@@ -159,7 +159,7 @@ export default class AdminProductEdit extends React.Component {
         backend.REQ_POST(backend.ADMIN_PRODUCT_EDIT_PATH + this.state.product.id, bodyData)
             .then(() => {
                 Loading.Remove();
-                frontend.notifyInfo("Edit product successfully!")
+                frontend.notifyInfo("Продукта е редактиран успешно!")
                 this.props.history.push(frontend.PRODUCT_DETAILS_PATH + this.state.product.id );
             }).catch((error) => error)
     }
@@ -338,7 +338,7 @@ export default class AdminProductEdit extends React.Component {
                         {/*)}*/}
 
 
-                        <button type="submit" className="btn btn-info m-3 w3-hover-yellow">Create</button>
+                        <button type="submit" className="btn btn-info m-3 w3-hover-yellow">Запази</button>
                     </form>
                 ) : (
                     <span>Loading...</span>

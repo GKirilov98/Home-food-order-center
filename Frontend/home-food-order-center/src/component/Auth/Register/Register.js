@@ -103,8 +103,8 @@ export default class Register extends React.Component {
         let firstChar = 0;
         for (const char of splitPhoneNumber) {
             if ((firstChar === 0 & char !== '0') || (char < '0') || (char > '9')) {
-                debugger;
                 frontend.notifyError("Phone number must start with 0 and contains only numbers!")
+                Loading.Remove();
                 return;
             }
 
@@ -113,6 +113,7 @@ export default class Register extends React.Component {
 
         if (this.state.password !== this.state.confirmPassword) {
             frontend.notifyError("Password doesn't match!")
+            Loading.Remove();
         } else {
             backend.REQ_POST(backend.REGISTER_URL, this.state)
                 .then(() => {
@@ -136,14 +137,14 @@ export default class Register extends React.Component {
 
         return (
             <div className="signup-form container">
-                <form onSubmit={this.handleSubmit}>
-                    <h2>Sign UP</h2>
-                    <p className="hint-text">Create your account. It's free and only takes a minute.</p>
+                <form onSubmit={this.handleSubmit} className="text-center">
+                    <h2>Регистрация</h2>
+                    <p className="hint-text">Създайте своя акант. Безплатно е и е нужно по-малко от минута</p>
                     <div className="form-group">
                         <div className="row">
                             <div className="col ml-1 mr-1">
                                 <input type="text" className="form-control" name={constants.USERNAME_NAME}
-                                       placeholder="Username"
+                                       placeholder="Потребителско име"
                                        maxLength='15' minLength='6' required='required'
                                        onChange={this.handleChange}/>
                             </div>
@@ -154,12 +155,12 @@ export default class Register extends React.Component {
                         <div className="row">
                             <div className="col">
                                 <input type="text" className="form-control" name={constants.FIRST_NAME_NAME}
-                                       placeholder="First Name" minLength='4' maxLength='30'
+                                       placeholder="Първо име" minLength='4' maxLength='30'
                                        required="required" onChange={this.handleChange}/>
                             </div>
                             <div className="col">
                                 <input type="text" className="form-control" name={constants.LAST_NAME_NAME}
-                                       placeholder="Last Name" minLength='4' maxLength='30'
+                                       placeholder="Фамилия" minLength='4' maxLength='30'
                                        required="required" onChange={this.handleChange}/>
                             </div>
                         </div>
@@ -174,7 +175,7 @@ export default class Register extends React.Component {
                             </div>
                             <div className="col">
                                 <input type="text" className="form-control" name={constants.PHONE_NUMBER_NAME}
-                                       placeholder="Phone number"
+                                       placeholder="Тел. номер"
                                        minLength='10' maxLength='10' required="required" onChange={this.handleChange}/>
                             </div>
                         </div>
@@ -185,12 +186,12 @@ export default class Register extends React.Component {
                         <div className="row">
                             <div className="col">
                                 <input type="password" className="form-control" name={constants.PASSWORD_NAME}
-                                       placeholder="Password" minLength='6' maxLength='20'
+                                       placeholder="Парола" minLength='6' maxLength='20'
                                        required="required" onChange={this.handleChange}/>
                             </div>
                             <div className="col">
                                 <input type="password" className="form-control" name={constants.CONFIRM_PASSWORD_NAME}
-                                       placeholder="Confirm Password" minLength='6' maxLength='20'
+                                       placeholder="Повтори парола" minLength='6' maxLength='20'
                                        required="required" onChange={this.handleChange}/>
                             </div>
                         </div>
@@ -210,11 +211,11 @@ export default class Register extends React.Component {
                         </label>
                     </div>
                     <div className="form-group">
-                        <button type="submit" className="btn btn-success btn-lg btn-">Sign Up</button>
+                        <button type="submit" className="btn btn-success btn-lg btn-">Регистрирай</button>
                     </div>
                 </form>
-                <div className="text-center form-control text-dark">Already have an account?
-                    <Link to={frontend.LOGIN_PATH} className="w3-hover-text-green text-info">Sign in</Link>
+                <div className="text-center form-control text-dark">Вече имате акоунт?
+                    <Link to={frontend.LOGIN_PATH} className="w3-hover-text-green text-info">Вход</Link>
                 </div>
             </div>
         );
