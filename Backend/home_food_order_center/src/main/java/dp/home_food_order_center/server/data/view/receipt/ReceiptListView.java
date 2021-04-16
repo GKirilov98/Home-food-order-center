@@ -7,6 +7,7 @@ import dp.home_food_order_center.server.data.model.user.UserModel;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -67,5 +68,29 @@ public class ReceiptListView implements Serializable {
 
     public void setTotalAmount(BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ReceiptListView that = (ReceiptListView) o;
+        return Objects.equals(id, that.id) && Objects.equals(statusCode, that.statusCode) && Objects.equals(userUsername, that.userUsername) && Objects.equals(dateAdded, that.dateAdded) && Objects.equals(totalAmount, that.totalAmount);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, statusCode, userUsername, dateAdded, totalAmount);
+    }
+
+    @Override
+    public String toString() {
+        return "ReceiptListView{" +
+                "id=" + id +
+                ", statusCode='" + statusCode + '\'' +
+                ", userUsername='" + userUsername + '\'' +
+                ", dateAdded=" + dateAdded +
+                ", totalAmount=" + totalAmount +
+                '}';
     }
 }

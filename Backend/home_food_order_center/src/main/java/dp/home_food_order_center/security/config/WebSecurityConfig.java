@@ -2,7 +2,7 @@ package dp.home_food_order_center.security.config;
 
 import dp.home_food_order_center.security.filter.AuthTokenFilter;
 import dp.home_food_order_center.security.jwt.AuthEntryPointJwt;
-import dp.home_food_order_center.security.jwt.AuthTokenSecurityService;
+import dp.home_food_order_center.security.service.IAuthTokenSecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -26,11 +27,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private AuthTokenSecurityService service;
+    private final IAuthTokenSecurityService service;
+    private final AuthEntryPointJwt unauthorizedHandler;
 
-    @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
+    public WebSecurityConfig(IAuthTokenSecurityService service, AuthEntryPointJwt unauthorizedHandler) {
+        this.service = service;
+        this.unauthorizedHandler = unauthorizedHandler;
+    }
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -41,6 +44,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
         authenticationManagerBuilder.userDetailsService(service).passwordEncoder(passwordEncoder());
     }
+
+//    @Override
+//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+//        auth.inMemoryAuthentication()
+//                .passwordEncoder(encoder)
+//                .withUser("USER!@")
+//                .password(encoder.encode("asdasd"))
+//                .roles("ADMIN");
+//    }
 
     @Bean
     @Override

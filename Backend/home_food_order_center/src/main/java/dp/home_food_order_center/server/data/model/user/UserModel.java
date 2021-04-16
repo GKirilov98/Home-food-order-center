@@ -4,6 +4,7 @@ import dp.home_food_order_center.server.data.view.receipt.ReceiptListView;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -112,4 +113,34 @@ public class UserModel implements Serializable {
         this.imagePublicId = imagePublicId;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserModel userModel = (UserModel) o;
+        return Objects.equals(id, userModel.id) && Objects.equals(imageUrl, userModel.imageUrl) && Objects.equals(imagePublicId, userModel.imagePublicId) && Objects.equals(username, userModel.username) && Objects.equals(firstName, userModel.firstName) && Objects.equals(lastName, userModel.lastName) && Objects.equals(email, userModel.email) && Objects.equals(phoneNumber, userModel.phoneNumber) && Objects.equals(address, userModel.address) && Objects.equals(dateRegistration, userModel.dateRegistration) && Objects.equals(receipts, userModel.receipts);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, imageUrl, imagePublicId, username, firstName, lastName, email, phoneNumber, address, dateRegistration, receipts);
+    }
+
+    @Override
+    public String toString() {
+        return "UserModel{" +
+                "id=" + id +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", imagePublicId='" + imagePublicId + '\'' +
+                ", username='" + username + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", address='" + address + '\'' +
+                ", dateRegistration=" + dateRegistration +
+                ", receipts=" + receipts +
+                '}';
+    }
 }

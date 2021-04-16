@@ -20,9 +20,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/category")
 public class CategoryController extends BaseController {
-
-    @Autowired
-    private ICategoryService categoryService;
+    private final ICategoryService categoryService;
+    public CategoryController(ICategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     /**
      * Returns all categories for catalog

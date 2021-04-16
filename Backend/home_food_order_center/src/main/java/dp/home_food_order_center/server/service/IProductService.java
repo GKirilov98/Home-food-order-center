@@ -1,7 +1,7 @@
 package dp.home_food_order_center.server.service;
 
 import dp.home_food_order_center.server.data.view.product.CreateProductView;
-import dp.home_food_order_center.server.data.view.product.ProductDetailsView;
+import dp.home_food_order_center.server.data.view.product.ProductDetailsModel;
 import dp.home_food_order_center.server.data.view.product.ProductEditView;
 import dp.home_food_order_center.server.data.view.product.ProductListView;
 import dp.home_food_order_center.server.error.GlobalServiceException;
@@ -29,7 +29,7 @@ public interface IProductService {
      * @param productId
      * @return
      */
-    List<ProductDetailsView> getOneById(Long productId) throws GlobalServiceException;
+    List<ProductDetailsModel> getOneById(Long productId) throws GlobalServiceException;
 
     //ADMIN>>
     /**
@@ -39,7 +39,7 @@ public interface IProductService {
      * @return
      * @throws GlobalServiceException
      */
-    List<ProductDetailsView> editProductById(Long id, ProductEditView params) throws GlobalServiceException;
+    List<ProductDetailsModel> editProductById(Long id, ProductEditView params) throws GlobalServiceException;
 
     /**
      * insertOne - Insert new row in database

@@ -38,20 +38,20 @@ public interface IUserService {
 
     /**
      * getUserById
-     * @param id
+     * @param username
      * @return
      * @throws GlobalServiceException
      */
-    List<UserModel> getUserById(long id) throws GlobalServiceException;
+    List<UserModel> getUserByUsername(String username) throws GlobalServiceException;
 
     /**
      *  editUser by id
-     * @param id
+     * @param username
      * @param params
      * @return
      * @throws GlobalServiceException
      */
-    List<UserModel> editUser(Long id, UserEditView params) throws GlobalServiceException;
+    List<UserModel> editUser(String username, UserEditView params) throws GlobalServiceException;
 
 
     //ADMINS>>>>

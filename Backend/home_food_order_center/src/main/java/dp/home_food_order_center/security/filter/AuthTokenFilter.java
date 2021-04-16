@@ -1,6 +1,6 @@
 package dp.home_food_order_center.security.filter;
 
-import dp.home_food_order_center.security.jwt.AuthTokenSecurityService;
+import dp.home_food_order_center.security.service.IAuthTokenSecurityService;
 import dp.home_food_order_center.security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,7 +29,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private JwtUtils jwtUtils;
 
     @Autowired
-    private AuthTokenSecurityService authTokenSecurityService;
+    private IAuthTokenSecurityService authTokenSecurityService;
 
     private static final Logger logger = LogManager.getLogger(AuthTokenFilter.class);
 
@@ -38,7 +38,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            if (jwt != null && !jwt.equals("null") && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
                 UserDetails userDetails = authTokenSecurityService.loadUserByUsername(username);

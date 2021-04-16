@@ -2,31 +2,19 @@ package dp.home_food_order_center.server.service.impl;
 
 import dp.home_food_order_center.security.jwt.UserDetailsImpl;
 import dp.home_food_order_center.server.data.entity.OrderEntity;
-import dp.home_food_order_center.server.data.entity.ProductEntity;
-import dp.home_food_order_center.server.data.entity.ReceiptEntity;
-import dp.home_food_order_center.server.data.model.receipt.ReceiptModel;
-import dp.home_food_order_center.server.data.view.category.CategorySelectView;
-import dp.home_food_order_center.server.data.view.product.ProductDetailsView;
-import dp.home_food_order_center.server.data.view.subcategory.SubcategorySelectView;
+import dp.home_food_order_center.server.data.view.product.ProductDetailsModel;
 import dp.home_food_order_center.server.error.GlobalServiceException;
 import dp.home_food_order_center.server.repository.IOrderRepository;
-import dp.home_food_order_center.server.repository.IProductRepository;
-import dp.home_food_order_center.server.repository.IReceiptRepository;
 import dp.home_food_order_center.server.service.IOrderService;
 import dp.home_food_order_center.server.service.IProductService;
 import dp.home_food_order_center.server.service.IReceiptService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Project: home_food_order_center
@@ -37,20 +25,24 @@ import java.util.stream.Collectors;
 public class IOrderServiceImpl implements IOrderService {
     private final Logger logger = LogManager.getLogger(IOrderServiceImpl.class);
 
-    @Autowired
-    private IOrderRepository orderRepository;
-    @Autowired
-    private IReceiptService receiptService;
-    @Autowired
-    private IProductService productService;
+    private final IOrderRepository orderRepository;
+    private final IReceiptService receiptService;
+    private final IProductService productService;
 
+    public IOrderServiceImpl(IOrderRepository orderRepository, IReceiptService receiptService, IProductService productService) {
+        this.orderRepository = orderRepository;
+        this.receiptService = receiptService;
+        this.productService = productService;
+    }
+
+    // TODO: 4/15/2021 Need to be integration tested integration
     @Override
     public String insertOne(Long productId, int quantity) throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
         try {
             logger.info(String.format("%s: Starting insertOne service!", logId));
             //Взимане на параметрите на продукта
-            ProductDetailsView productDetails = this.productService.getOneById(productId).get(0);
+            ProductDetailsModel productDetails = this.productService.getOneById(productId).get(0);
             int newMaxQuantity = productDetails.getAvailableQuantity() - quantity;
             if (newMaxQuantity < 0) {
                 String message = String.format("Not available quantity! Max quantity: %d", productDetails.getAvailableQuantity());
@@ -78,6 +70,7 @@ public class IOrderServiceImpl implements IOrderService {
         }
     }
 
+    // TODO: 4/15/2021 Need to be integration tested integration
     @Override
     public String deleteOneById(Long id) throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();

@@ -1,7 +1,7 @@
 package dp.home_food_order_center.server.controller;
 
 import dp.home_food_order_center.server.controller.base.BaseController;
-import dp.home_food_order_center.server.data.view.product.ProductDetailsView;
+import dp.home_food_order_center.server.data.view.product.ProductDetailsModel;
 import dp.home_food_order_center.server.data.view.product.ProductListView;
 import dp.home_food_order_center.server.error.GlobalServiceException;
 import dp.home_food_order_center.server.service.IProductService;
@@ -47,7 +47,7 @@ public class ProductController extends BaseController {
      */
     @GetMapping("/details/{productId}")
     public ResponseEntity<?> getOneById (@PathVariable Long productId) throws GlobalServiceException {
-        List<ProductDetailsView> list = this.productService.getOneById(productId);
+        List<ProductDetailsModel> list = this.productService.getOneById(productId);
         return ResponseEntity.ok().body(list);
     }
 }

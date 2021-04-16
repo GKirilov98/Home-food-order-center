@@ -28,8 +28,6 @@ public class ImageServiceImpl implements IImageService {
     private static final String API_KEY = "546934454118545";
     private static final String API_SECRET = "EYAqkSIRPYaNWhddbqOYRAShYQ4";
     private static final String CLOUD_NAME = "drb3wiwvh";
-    public static final String CLOUDINARY_URL = String.format("CLOUDINARY_URL=cloudinary://%s:%s@%s", API_KEY, API_SECRET, CLOUD_NAME);
-
 
     @Override
     public Map<String, String > uploadImageCloudinary(MultipartFile image) throws GlobalServiceException {
@@ -42,23 +40,15 @@ public class ImageServiceImpl implements IImageService {
                 outputStream.write(image.getBytes());
             }
 
-//            if (!file.exists()) {
-//                logger.error(String.format("%s: Couldn't found the image!", logId));
-//                throw new GlobalServiceException(logId, "Не мога да намеря изображението!", "Couldn't found the image!");
-//            }
-
             Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
                     "cloud_name", CLOUD_NAME,
                     "api_key", API_KEY,
                     "api_secret", API_SECRET));
             Map upload = cloudinary.uploader().upload(file, ObjectUtils.emptyMap());
-//            return (String) upload.get("url");
             Map<String, String> resultMap = new HashMap<>();
             resultMap.put("public_id", upload.get("public_id").toString());
             resultMap.put("url", upload.get("url").toString());
             return resultMap;
-//        } catch (GlobalServiceException e) {
-//            throw e;
         } catch (Exception e) {
             logger.error(String.format("%s: Unexpected uploadImageCloudinary service error!", logId), e);
             throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected service error!");

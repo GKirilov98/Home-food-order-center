@@ -30,12 +30,15 @@ import java.util.stream.Collectors;
 @Service
 public class IReceiptServiceImpl implements IReceiptService {
     private final Logger logger = LogManager.getLogger(IReceiptServiceImpl.class);
-    @Autowired
-    private ModelMapper modelMapper;
-    @Autowired
-    private IUserRepository userRepository;
-    @Autowired
-    private IReceiptRepository receiptRepository;
+    private final ModelMapper modelMapper;
+    private final IUserRepository userRepository;
+    private final IReceiptRepository receiptRepository;
+
+    public IReceiptServiceImpl(ModelMapper modelMapper, IUserRepository userRepository, IReceiptRepository receiptRepository) {
+        this.modelMapper = modelMapper;
+        this.userRepository = userRepository;
+        this.receiptRepository = receiptRepository;
+    }
 
     @Override
     public ReceiptModel getNotPaidReceiptByUserId(Long userId) throws GlobalServiceException {
@@ -73,6 +76,7 @@ public class IReceiptServiceImpl implements IReceiptService {
         }
     }
 
+    // TODO: 4/15/2021 Needed integration tests
     @Override
     public List<ReceiptModel> getShoppingReceiptForCurrUser() throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
@@ -92,38 +96,11 @@ public class IReceiptServiceImpl implements IReceiptService {
         }
     }
 
-//    @Override
-//    public List<ReceiptModel> getReceiptForCurrUser() throws GlobalServiceException {
-//        String logId = UUID.randomUUID().toString();
-//        try {
-//            logger.info(String.format("%s: Starting getReceiptForCurrUserByStatusCode service!", logId));
-//            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//            Long userId = ((UserDetailsImpl) principal).getId();
-//            if (ReceiptStatusType.SHOPPING.toString().equals(statusCode)) {
-//                List<ReceiptEntity> entities = this.receiptRepository.findAllByUserIdAndStatusCode(userId, ReceiptStatusType.SHOPPING);
-//                return entities.stream()
-//                        .map(e -> this.modelMapper.map(e, ReceiptModel.class))
-//                        .collect(Collectors.toList());
-//            } else {
-//                String errMessage = String.format("Invalid status code! Status code: %s", statusCode);
-//                logger.error(String.format("%s: %s", logId, errMessage));
-//                throw new GlobalServiceException(logId, "Невалиден статус код на количка!", errMessage);
-//            }
-//        } catch (GlobalServiceException e) {
-//            throw e;
-//        } catch (Exception e) {
-//            logger.error(String.format("%s: Unexpected getReceiptForCurrUserByStatusCode service error!", logId), e);
-//            throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected service error!");
-//        } finally {
-//            logger.info(String.format("%s: Finished getReceiptForCurrUserByStatusCode service!", logId));
-//        }
-//    }
-
     @Override
     public String confirmReceipt(Long receiptId, String city, String address) throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
         try {
-            logger.info(String.format("%s: Starting getReceiptForCurrUserByStatusCode service!", logId));
+            logger.info(String.format("%s: Starting confirmReceipt service!", logId));
             ReceiptEntity receiptEntity = this.receiptRepository.findById(receiptId).orElse(null);
             if (receiptEntity == null) {
                 logger.error(String.format("%s: Invalid receiptId! %s", logId, receiptId));
@@ -133,15 +110,16 @@ public class IReceiptServiceImpl implements IReceiptService {
             String dbAddress = String.format("%s, %s", city, address);
             receiptEntity.setDeliveryAddress(dbAddress);
             receiptEntity.setStatusCode(ReceiptStatusType.SEND);
+            receiptEntity.setDateAdded(new Timestamp(System.currentTimeMillis()));
             this.receiptRepository.saveAndFlush(receiptEntity);
             return "Confirmed cart successfully!";
         } catch (GlobalServiceException e) {
             throw e;
         } catch (Exception e) {
-            logger.error(String.format("%s: Unexpected getReceiptForCurrUserByStatusCode service error!", logId), e);
-            throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected service error!");
+            logger.error(String.format("%s: Unexpected confirmReceipt service error!", logId), e);
+            throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected confirmReceipt service error!");
         } finally {
-            logger.info(String.format("%s: Finished getReceiptForCurrUserByStatusCode service!", logId));
+            logger.info(String.format("%s: Finished confirmReceipt service!", logId));
         }
     }
 
@@ -248,6 +226,8 @@ public class IReceiptServiceImpl implements IReceiptService {
             }
 
             return views;
+        } catch (GlobalServiceException e){
+            throw e;
         } catch (Exception e) {
             logger.error(String.format("%s: Unexpected getReceiptById service error!", logId), e);
             throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected service error!");
@@ -269,7 +249,8 @@ public class IReceiptServiceImpl implements IReceiptService {
 
             receiptEntity.setStatusCode(ReceiptStatusType.PAID);
             List<ReceiptModel> models = new ArrayList<>();
-            ReceiptModel model = this.modelMapper.map(receiptRepository.saveAndFlush(receiptEntity), ReceiptModel.class);
+            receiptRepository.saveAndFlush(receiptEntity);
+            ReceiptModel model = this.modelMapper.map(receiptEntity, ReceiptModel.class);
             models.add(model);
             return models;
 
@@ -282,35 +263,4 @@ public class IReceiptServiceImpl implements IReceiptService {
             logger.info(String.format("%s: Finished changeReceiptToPaid service!", logId));
         }
     }
-
-//    @Override
-//    public File exportReceiptById(Long id) throws GlobalServiceException {
-//        String logId = UUID.randomUUID().toString();
-//        try {
-//            logger.info(String.format("%s: Starting exportReceiptById service!", logId));
-//            ReceiptEntity receiptEntity = this.receiptRepository.findById(id).orElse(null);
-//            if (receiptEntity == null) {
-//                logger.error(String.format("%s: Invalid receiptId! %s", logId, id));
-//                throw new GlobalServiceException(logId, "Невалиден receiptId!", "Invalid receiptId!");
-//            }
-//
-//            List<ReceiptEntity> list = new ArrayList<>();
-//            list.add(receiptEntity);
-//            String fileName = "RECEIPT_" + id;
-//            String zipName = fileName + "_" + logId;
-//            String title = "Касова номер: " + id;
-//           return excelService.exportToExcelAndDownloadStream(logId, fileName, zipName,title, list);
-//
-//        } catch (GlobalServiceException e) {
-//            throw e;
-//        } catch (Exception e) {
-//            logger.error(String.format("%s: Unexpected exportReceiptById service error!", logId), e);
-//            throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected exportReceiptById service error!");
-//        } finally {
-//            logger.info(String.format("%s: Finished exportReceiptById service!", logId));
-//        }
-//
-//
-//
-//    }
 }

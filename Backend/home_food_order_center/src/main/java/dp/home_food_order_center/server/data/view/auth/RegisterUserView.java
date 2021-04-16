@@ -7,7 +7,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class RegisterUserView {
+//    @JsonProperty("imageUrl")
     private String imageUrl;
+//    @JsonProperty("imagePublicId")
     private String imagePublicId;
     @JsonProperty("username")
     @Size(min = 6, max = 15, message = "Username must be between 6 and 15 symbols.")

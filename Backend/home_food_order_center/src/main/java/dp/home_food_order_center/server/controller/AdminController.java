@@ -4,7 +4,7 @@ import dp.home_food_order_center.server.controller.base.BaseController;
 import dp.home_food_order_center.server.data.model.receipt.ReceiptModel;
 import dp.home_food_order_center.server.data.model.user.UserListModel;
 import dp.home_food_order_center.server.data.view.product.CreateProductView;
-import dp.home_food_order_center.server.data.view.product.ProductDetailsView;
+import dp.home_food_order_center.server.data.view.product.ProductDetailsModel;
 import dp.home_food_order_center.server.data.view.product.ProductEditView;
 import dp.home_food_order_center.server.data.view.receipt.ReceiptListView;
 import dp.home_food_order_center.server.error.GlobalServiceException;
@@ -124,7 +124,7 @@ public class AdminController extends BaseController {
      */
     @PostMapping("/product/edit/{id}")
     public ResponseEntity<?> editProductById(@PathVariable Long id, @Valid @RequestBody ProductEditView params) throws GlobalServiceException {
-        List<ProductDetailsView> list = this.productService.editProductById(id, params);
+        List<ProductDetailsModel> list = this.productService.editProductById(id, params);
         return ResponseEntity.ok().body(list);
     }
 

@@ -1,5 +1,6 @@
-package dp.home_food_order_center.security.service;
+package dp.home_food_order_center.security.service.impl;
 
+import dp.home_food_order_center.security.service.IAuthenticateService;
 import dp.home_food_order_center.server.data.entity.RoleEntity;
 import dp.home_food_order_center.server.data.entity.RoleType;
 import dp.home_food_order_center.server.data.entity.UserEntity;
@@ -13,7 +14,6 @@ import dp.home_food_order_center.security.model.AuthenticateResponseModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -34,27 +34,25 @@ import java.util.stream.Collectors;
  * On: 3/28/2021
  */
 @Service
-public class AuthenticateService {
-    private final Logger logger = LogManager.getLogger(AuthenticateService.class);
+public class IAuthenticateServiceImpl implements IAuthenticateService {
+    private final Logger logger = LogManager.getLogger(IAuthenticateServiceImpl.class);
+    private final AuthenticationManager authenticationManager;
+    private final IUserRepository userRepository;
+    private final IRoleRepository roleRepository;
+    private final PasswordEncoder encoder;
+    private final JwtUtils jwtUtils;
+    private final ModelMapper modelMapper;
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+    public IAuthenticateServiceImpl(AuthenticationManager authenticationManager, IUserRepository userRepository, IRoleRepository roleRepository, PasswordEncoder encoder, JwtUtils jwtUtils, ModelMapper modelMapper) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.encoder = encoder;
+        this.jwtUtils = jwtUtils;
+        this.modelMapper = modelMapper;
+    }
 
-    @Autowired
-    IUserRepository userRepository;
-
-    @Autowired
-    IRoleRepository roleRepository;
-
-    @Autowired
-    PasswordEncoder encoder;
-
-    @Autowired
-    JwtUtils jwtUtils;
-
-    @Autowired
-    ModelMapper modelMapper;
-
+    @Override
     public AuthenticateResponseModel loginUser(String username, String password) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password));
@@ -74,6 +72,7 @@ public class AuthenticateService {
                 roles);
     }
 
+    @Override
     public String registerUser(UserAuthRegistrationModel model) throws GlobalServiceException {
 
         if (userRepository.existsByUsername(model.getUsername())) {
@@ -87,7 +86,7 @@ public class AuthenticateService {
         }
 
         int roleCount = this.roleRepository.findAll().size();
-        if (roleCount == 0){
+        if (roleCount == 0) {
             for (RoleType value : RoleType.values()) {
                 RoleEntity role = new RoleEntity();
                 role.setDateRegistration(new Timestamp(System.currentTimeMillis()));
@@ -133,6 +132,7 @@ public class AuthenticateService {
         return "User registered successfully!";
     }
 
+    @Override
     public String logoutUser(String token) {
         jwtUtils.addLogOutToken(token);
         return "Logout successfully!";

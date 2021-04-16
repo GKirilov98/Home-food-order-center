@@ -25,26 +25,26 @@ public class UserController extends BaseController {
 
     /**
      *  Get user by id
-     * @param id
+     * @param username
      * @return
      * @throws GlobalServiceException
      */
-    @GetMapping("/profile/{id}")
-    public ResponseEntity<?> getUserProfileById(@PathVariable Long id) throws GlobalServiceException {
-        List<UserModel> list = this.userService.getUserById(id);
+    @GetMapping("/profile/{username}")
+    public ResponseEntity<?> getUserProfileById(@PathVariable String username) throws GlobalServiceException {
+        List<UserModel> list = this.userService.getUserByUsername(username);
         return ResponseEntity.ok().body(list);
     }
 
     /**
      * Edit user by id
-     * @param id
+     * @param username
      * @param params
      * @return
      * @throws GlobalServiceException
      */
-    @PostMapping("/edit/{id}")
-    public ResponseEntity<?> editUserById(@PathVariable Long id, @Valid @RequestBody UserEditView params) throws GlobalServiceException {
-        List<UserModel> list = this.userService.editUser(id, params);
+    @PostMapping("/edit/{username}")
+    public ResponseEntity<?> editUserById(@PathVariable String username, @Valid @RequestBody UserEditView params) throws GlobalServiceException {
+        List<UserModel> list = this.userService.editUser(username, params);
         return ResponseEntity.ok().body(list);
     }
 }

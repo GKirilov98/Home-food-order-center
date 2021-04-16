@@ -5,7 +5,7 @@ import dp.home_food_order_center.server.data.entity.ProductEntity;
 import dp.home_food_order_center.server.data.entity.SubcategoryEntity;
 import dp.home_food_order_center.server.data.entity.base.BaseEntity;
 import dp.home_food_order_center.server.data.view.product.CreateProductView;
-import dp.home_food_order_center.server.data.view.product.ProductDetailsView;
+import dp.home_food_order_center.server.data.view.product.ProductDetailsModel;
 import dp.home_food_order_center.server.data.view.product.ProductEditView;
 import dp.home_food_order_center.server.data.view.product.ProductListView;
 import dp.home_food_order_center.server.error.GlobalServiceException;
@@ -16,7 +16,6 @@ import dp.home_food_order_center.server.service.IProductService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -31,16 +30,19 @@ import java.util.stream.Collectors;
  * On: 3/26/2021 9:11 PM
  */
 @Service
-public class ProductServiceImpl implements IProductService {
-    private final Logger logger = LogManager.getLogger(ProductServiceImpl.class);
-    @Autowired
-    private ModelMapper modelMapper;
-    @Autowired
-    private IProductRepository productRepository;
-    @Autowired
-    private ISubcategoryRepository subcategoryRepository;
-    @Autowired
-    private ICategoryRepository categoryRepository;
+public class IProductServiceImpl implements IProductService {
+    private final Logger logger = LogManager.getLogger(IProductServiceImpl.class);
+    private final ModelMapper modelMapper;
+    private final IProductRepository productRepository;
+    private final ISubcategoryRepository subcategoryRepository;
+    private final ICategoryRepository categoryRepository;
+
+    public IProductServiceImpl(ModelMapper modelMapper, IProductRepository productRepository, ISubcategoryRepository subcategoryRepository, ICategoryRepository categoryRepository) {
+        this.modelMapper = modelMapper;
+        this.productRepository = productRepository;
+        this.subcategoryRepository = subcategoryRepository;
+        this.categoryRepository = categoryRepository;
+    }
 
     @Override
     public List<ProductListView> getAllByCategoryIdOrSubcategoryId(Long categoryId, Long subcategoryId) throws GlobalServiceException {
@@ -64,18 +66,9 @@ public class ProductServiceImpl implements IProductService {
                 entities = this.productRepository.findAllBySubcategoryIdIn(subcategoriesId);
             }
 
-
-            final int[] counter = {0};
             return entities.stream()
-                    .map(e -> {
-                        ProductListView view = this.modelMapper.map(e, ProductListView.class);
-                        view.setSold(e.getAvailableQuantity() > 0);
-                        view.setSale(counter[0] % 5 == 0);
-                        counter[0]++;
-                        return view;
-                    })
+                    .map(e -> this.modelMapper.map(e, ProductListView.class))
                     .collect(Collectors.toList());
-
         } catch (GlobalServiceException e) {
             throw e;
         } catch (Exception e) {
@@ -87,28 +80,28 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public List<ProductDetailsView> getOneById(Long productId) throws GlobalServiceException {
+    public List<ProductDetailsModel> getOneById(Long productId) throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
         //Записване в базата
         try {
             logger.info(String.format("%s: Starting getOneById service!", logId));
             ProductEntity productEntity = this.productRepository.findById(productId)
                     .orElse(null);
-            if (productEntity == null){
+            if (productEntity == null) {
                 logger.error(String.format("%s: No such product with id: %d", logId, productId));
-                throw new  GlobalServiceException(logId, "Не е намерен продукт с това id" ,String.format("No such product with id: %d", productId));
+                throw new GlobalServiceException(logId, "Не е намерен продукт с това id", String.format("No such product with id: %d", productId));
             }
 
             SubcategoryEntity subcategory = productEntity.getSubcategory();
             CategoryEntity category = productEntity.getSubcategory().getCategory();
 
-            ProductDetailsView detailsView = this.modelMapper.map(productEntity, ProductDetailsView.class);
+            ProductDetailsModel detailsView = this.modelMapper.map(productEntity, ProductDetailsModel.class);
             detailsView.setCategory(category.getName());
             detailsView.setCategoryId(category.getId());
 
             detailsView.setSubcategory(subcategory.getName());
             detailsView.setSubcategoryId(subcategory.getId());
-            List<ProductDetailsView> list = new ArrayList<>();
+            List<ProductDetailsModel> list = new ArrayList<>();
             list.add(detailsView);
             return list;
         } catch (GlobalServiceException e) {
@@ -145,15 +138,15 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public List<ProductDetailsView> editProductById(Long id, ProductEditView params) throws GlobalServiceException {
+    public List<ProductDetailsModel> editProductById(Long id, ProductEditView params) throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
         //Записване в базата
         try {
             logger.info(String.format("%s: Starting editProductById service!", logId));
             ProductEntity oldProductEntity = this.productRepository.findById(id).orElse(null);
-            if (oldProductEntity == null){
+            if (oldProductEntity == null) {
                 logger.error(String.format("%s: No such product with id: %d", logId, id));
-                throw new  GlobalServiceException(logId, "Не е намерен продукт с това id" ,String.format("No such product with id: %d", id));
+                throw new GlobalServiceException(logId, "Не е намерен продукт с това id", String.format("No such product with id: %d", id));
             }
 
             oldProductEntity.setImageUrl(params.getImageUrl());
@@ -163,22 +156,24 @@ public class ProductServiceImpl implements IProductService {
             oldProductEntity.setAvailableQuantity(params.getAvailableQuantity());
             oldProductEntity.setPrice(params.getPrice());
             SubcategoryEntity subcategoryEntity = this.subcategoryRepository.findById(params.getSubcategoryId()).orElse(null);
-            if (subcategoryEntity == null){
+            if (subcategoryEntity == null) {
                 logger.error(String.format("%s: No such subcategory with id: %d", logId, params.getSubcategoryId()));
-                throw new  GlobalServiceException(logId, "Не е намерена под категориа с това id",
+                throw new GlobalServiceException(logId, "Не е намерена под категориа с това id",
                         String.format("No such subcategory with id: %d", params.getSubcategoryId()));
             }
             oldProductEntity.setSubcategory(subcategoryEntity);
             oldProductEntity.setDateLastEdit(new Timestamp(System.currentTimeMillis()));
 
-            ProductEntity newProductEntity = this.productRepository.saveAndFlush(oldProductEntity);
+            this.productRepository.saveAndFlush(oldProductEntity);
 
             String subcategoryName = subcategoryEntity.getName();
             String categoryName = subcategoryEntity.getCategory().getName();
-            ProductDetailsView detailsView = this.modelMapper.map(newProductEntity, ProductDetailsView.class);
+            ProductDetailsModel detailsView = this.modelMapper.map(oldProductEntity, ProductDetailsModel.class);
+            detailsView.setCategoryId(subcategoryEntity.getCategory().getId());
             detailsView.setCategory(categoryName);
             detailsView.setSubcategory(subcategoryName);
-            List<ProductDetailsView> list = new ArrayList<>();
+            detailsView.setSubcategoryId(subcategoryEntity.getId());
+            List<ProductDetailsModel> list = new ArrayList<>();
             list.add(detailsView);
             return list;
         } catch (GlobalServiceException e) {

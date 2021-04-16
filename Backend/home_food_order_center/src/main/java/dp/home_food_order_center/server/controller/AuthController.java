@@ -20,10 +20,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/auth")
 public class AuthController extends BaseController {
-    @Autowired
-    private IUserService userService;
-    @Autowired
-    private ModelMapper modelMapper;
+    private final IUserService userService;
+
+    public AuthController(IUserService userService) {
+        this.userService = userService;
+    }
 
     /**
      * insertOne - Insert new record in the table

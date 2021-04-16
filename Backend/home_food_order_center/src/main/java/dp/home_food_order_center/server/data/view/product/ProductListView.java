@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * Project: home_food_order_center
@@ -31,12 +32,12 @@ public class ProductListView implements Serializable {
     @DecimalMin(value = "0.1")
     @Digits(integer=3, fraction=2)
     private BigDecimal price;
-    @JsonProperty("isSold")
-    private boolean isSold;
-    @JsonProperty("isSale")
-    private boolean isSale;
-    @JsonProperty("isNew")
-    private boolean isNew;
+//    @JsonProperty("isSold")
+//    private boolean isSold;
+//    @JsonProperty("isSale")
+//    private boolean isSale;
+//    @JsonProperty("isNew")
+//    private boolean isNew;
 
     public Long getId() {
         return id;
@@ -78,27 +79,52 @@ public class ProductListView implements Serializable {
         this.price = price;
     }
 
-    public boolean isSold() {
-        return isSold;
+//    public boolean isSold() {
+//        return isSold;
+//    }
+//
+//    public void setSold(boolean sold) {
+//        isSold = sold;
+//    }
+//
+//    public boolean isSale() {
+//        return isSale;
+//    }
+//
+//    public void setSale(boolean sale) {
+//        isSale = sale;
+//    }
+//
+//    public boolean isNew() {
+//        return isNew;
+//    }
+//
+//    public void setNew(boolean aNew) {
+//        isNew = aNew;
+//    }
+
+
+    @Override
+    public String toString() {
+        return "ProductListView{" +
+                "id=" + id +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", imagePublicId='" + imagePublicId + '\'' +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                '}';
     }
 
-    public void setSold(boolean sold) {
-        isSold = sold;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProductListView that = (ProductListView) o;
+        return Objects.equals(id, that.id) && Objects.equals(imageUrl, that.imageUrl) && Objects.equals(imagePublicId, that.imagePublicId) && Objects.equals(name, that.name) && Objects.equals(price, that.price);
     }
 
-    public boolean isSale() {
-        return isSale;
-    }
-
-    public void setSale(boolean sale) {
-        isSale = sale;
-    }
-
-    public boolean isNew() {
-        return isNew;
-    }
-
-    public void setNew(boolean aNew) {
-        isNew = aNew;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, imageUrl, imagePublicId, name, price);
     }
 }

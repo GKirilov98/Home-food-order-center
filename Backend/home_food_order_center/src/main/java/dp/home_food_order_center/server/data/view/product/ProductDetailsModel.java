@@ -5,13 +5,14 @@ import org.springframework.lang.NonNull;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * Project: home_food_order_center
  * Created by: G.Kirilov
  * On: 4/5/2021
  */
-public class ProductDetailsView implements Serializable {
+public class ProductDetailsModel implements Serializable {
     @JsonProperty("id")
     @NonNull
     private Long id;
@@ -46,8 +47,9 @@ public class ProductDetailsView implements Serializable {
     @NonNull
     private String subcategory;
 
-    public ProductDetailsView() {
+    public ProductDetailsModel() {
     }
+
 
     @NonNull
     public String getImagePublicId() {
@@ -146,5 +148,41 @@ public class ProductDetailsView implements Serializable {
 
     public void setSubcategory(@NonNull String subcategory) {
         this.subcategory = subcategory;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProductDetailsModel model = (ProductDetailsModel) o;
+        return id.equals(model.id) && name.equals(model.name) &&
+                description.equals(model.description) && price.equals(model.price) &&
+                availableQuantity.equals(model.availableQuantity) &&
+                imagePublicId.equals(model.imagePublicId) && imageUrl.equals(model.imageUrl) &&
+                categoryId.equals(model.categoryId) && category.equals(model.category) &&
+                subcategoryId.equals(model.subcategoryId) && subcategory.equals(model.subcategory);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, price, availableQuantity,
+                imagePublicId, imageUrl, categoryId, category, subcategoryId, subcategory);
+    }
+
+    @Override
+    public String toString() {
+        return "ProductDetailsModel{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", availableQuantity=" + availableQuantity +
+                ", imagePublicId='" + imagePublicId + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", categoryId=" + categoryId +
+                ", category='" + category + '\'' +
+                ", subcategoryId=" + subcategoryId +
+                ", subcategory='" + subcategory + '\'' +
+                '}';
     }
 }

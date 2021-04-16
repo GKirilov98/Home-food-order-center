@@ -1,12 +1,14 @@
-package dp.home_food_order_center.security.jwt;
+package dp.home_food_order_center.security.service.impl;
 
+import dp.home_food_order_center.security.jwt.UserDetailsImpl;
+import dp.home_food_order_center.security.service.IAuthTokenSecurityService;
 import dp.home_food_order_center.server.data.entity.UserEntity;
 import dp.home_food_order_center.server.repository.IUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -15,9 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
  * On: 3/28/2021
  */
 @Component
-public class AuthTokenSecurityService  implements UserDetailsService {
-    @Autowired
-    IUserRepository repository;
+public class IAuthTokenSecurityServiceImpl implements IAuthTokenSecurityService {
+    private final IUserRepository repository;
+
+    public IAuthTokenSecurityServiceImpl(IUserRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     @Transactional

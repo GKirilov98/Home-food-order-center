@@ -27,22 +27,20 @@ import java.util.stream.Collectors;
 @Service
 public class ICategoryServiceImpl implements ICategoryService {
     private final Logger logger = LogManager.getLogger(ICategoryServiceImpl.class);
+    private final ICategoryRepository categoryRepository;
+    private final ModelMapper modelMapper;
+
     @Autowired
-    private ISubcategoryRepository subcategoryRepository;
-    @Autowired
-    private ICategoryRepository categoryRepository;
-    @Autowired
-    private ModelMapper modelMapper;
+    public ICategoryServiceImpl(ICategoryRepository categoryRepository, ModelMapper modelMapper) {
+        this.categoryRepository = categoryRepository;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public List<CategorySelectView> getAllForSelect() throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
         try {
             logger.info(String.format("%s: Starting getAllForSelect service!", logId));
-            //Fixme Попълване на данни
-            this.fillData();
-            //
-
             return this.categoryRepository.findAll()
                     .stream()
                     .map(e -> {
@@ -57,27 +55,6 @@ public class ICategoryServiceImpl implements ICategoryService {
             throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected service error!");
         } finally {
             logger.info(String.format("%s: Finished getAllForSelect service!", logId));
-        }
-    }
-
-    private void fillData() {
-        if (this.categoryRepository.findAll().size() == 0) {
-            Map<String, String[]> categorySubcategories = new HashMap<>();
-            categorySubcategories.put("Напитки", new String[]{"Алкохолни", "Безалкохолни", "Кафе"});
-            categorySubcategories.put("Храни", new String[]{"Пица", "Аламинут", "Риба", "Месо", "Хляб", "Скара", "Салата", "Десерт"});
-            for (String category : categorySubcategories.keySet()) {
-                CategoryEntity categoryEntity = new CategoryEntity();
-                categoryEntity.setName(category);
-                CategoryEntity savedCategory = this.categoryRepository.saveAndFlush(categoryEntity);
-
-                for (String sub : categorySubcategories.get(category)) {
-                    SubcategoryEntity subcategoryEntity = new SubcategoryEntity();
-                    subcategoryEntity.setName(sub);
-                    subcategoryEntity.setCategory(savedCategory);
-                    this.subcategoryRepository.saveAndFlush(subcategoryEntity);
-                }
-            }
-
         }
     }
 }
