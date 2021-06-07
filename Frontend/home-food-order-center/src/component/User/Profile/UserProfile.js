@@ -76,6 +76,22 @@ export default class UserProfile extends React.Component {
 
 
     render() {
+        let isAdmin = false;
+        let array = this.props.location.pathname.split("/");
+        debugger;
+        if (array[array.length - 1] === sessionStorage.getItem(constants.USERNAME_KEY_NAME)) {
+            isAdmin = true;
+        } else {
+            sessionStorage.getItem(constants.USER_ROLES_KEY_NAME)
+                .split(",")
+                .forEach( e => {
+                    if (e.toLowerCase() === constants.ROLE_ADMIN.toLowerCase()){
+                        isAdmin = true;
+                    }
+                })
+        }
+
+
         return (
             <div className="container emp-profile">
                 {this.state.user != null ? (
@@ -88,9 +104,6 @@ export default class UserProfile extends React.Component {
                             </div>
                             <div className="col-md-6">
                                 <div className="profile-head">
-                                    {/*<h5>*/}
-                                    {/*    Kshiti Ghelani*/}
-                                    {/*</h5>*/}
                                     <ul className="nav nav-tabs" id="myTab" role="tablist">
                                         <li className="nav-item">
                                             <span className="nav-link active" id="about-tab" data-toggle="tab"
@@ -107,9 +120,10 @@ export default class UserProfile extends React.Component {
                                     </ul>
                                 </div>
                             </div>
-                            <div className="col-md-2">
+                            { isAdmin ? ( <div className="col-md-2">
                                 <Link to={frontendUtils.USER_EDIT_PATH + this.state.user.username} className="btn btn-warning">Edit</Link>
-                            </div>
+                            </div>):(<React.Fragment />)}
+
                         </div>
                         <div className="row pt-3 ml-5">
                             <div className="col">

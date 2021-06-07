@@ -17,18 +17,33 @@ export default class ReceiptView extends React.Component {
         }
     }
 
-    static getDerivedStateFromProps(props, state) {
+    static getDerivedStateFromProps(props) {
         if (sessionStorage.getItem(constants.USERNAME_KEY_NAME) == null) {
-            frontendUtils.notifyError("Моля влезте в системата!");
             props.history.push(frontend.LOGIN_PATH);
         }
     }
 
     handleClick(event) {
         Loading.Standard('Loading...',);
-        backend.REQ_POST(backend.ADMIN_RECEIPT_PAID_URL + this.state.receipt.id)
+        backend.REQ_POST(backend.BUSINESS_RECEIPT_PAID_URL + this.state.receipt.id)
             .then(res => res.json())
             .then(res => {
+                if (res[0].user.username !== sessionStorage.getItem(constants.USERNAME_KEY_NAME)){
+                    let isBusiness = false;
+                    let isAdmin = false;
+                    sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
+                        .forEach((role) => {
+                            if (role === constants.ROLE_BUSINESS) {
+                                isBusiness = true;
+                            } else if (role === constants.ROLE_ADMIN) {
+                                isAdmin = true;
+                            }
+                        })
+                    if (!isBusiness && !isAdmin) {
+                        frontendUtils.notifyError("Нямате необходимите права за достап!");
+                        this.props.history.push(frontendUtils.CATALOG_PATH);
+                    }
+                }
 
 
                 this.setState({
@@ -54,26 +69,11 @@ export default class ReceiptView extends React.Component {
             .then(res => res.json())
             .then(res => {
                 Loading.Remove();
-                if (sessionStorage.getItem(constants.ID_KEY_NAME) != res[0].user.id) {
-                    let isAdmin = false
-                    sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
-                        .forEach((role) => {
-                            if (role == constants.ROLE_ADMIN) {
-                                isAdmin = true;
-                            }
-                        })
-                    if (!isAdmin) {
-                        frontendUtils.notifyError("Нямате необходимите права за достап!");
-                        this.props.history.push(frontendUtils.CATALOG_PATH);
-                    }
-                }
-
                 this.setState({
                     receipt: res[0]
                 })
             })
             .catch(err => {
-                    console.log(err);
                     Loading.Remove();
                     if (err.message === '401') {
                         sessionStorage.clear();
@@ -154,7 +154,13 @@ export default class ReceiptView extends React.Component {
 
                                                 <div className="my-2">
                                                     <span className="text-600 text-90">Статус:</span> <span
-                                                    className="badge badge-warning badge-pill px-25">{this.state.receipt.statusCode}</span>
+                                                    className="badge badge-warning badge-pill px-25">{
+                                                    this.state.receipt.statusCode === "SEND" ? ("Изпратена") :(
+                                                        this.state.receipt.statusCode === "PAID" ? ("Платена") : (
+                                                            "Пазаруване"
+                                                        )
+                                                        )
+                                                    }</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -216,17 +222,17 @@ export default class ReceiptView extends React.Component {
 
                                         <hr/>
 
-                                        <Link to={frontendUtils.CATALOG_PATH}
-                                              className="btn btn-info btn-bold px-4 float-right mt-3 mt-lg-0">
-                                            Catalog
+                                        <Link to={frontendUtils.CATALOG_PATH} className="btn btn-info btn-bold px-4 float-right mt-3 mt-lg-0">
+                                            Каталог
                                         </Link>
                                         {
                                             sessionStorage.getItem('roles').split(',').map((role) => {
                                                 return <React.Fragment>
-                                                    {role === constants.ROLE_ADMIN && this.state.receipt.statusCode === "SEND" ? (
+                                                    {(role === constants.ROLE_ADMIN || role === constants.ROLE_BUSINESS) &&
+                                                    this.state.receipt.statusCode === "SEND" ? (
                                                         <React.Fragment>
                                                             <button onClick={this.handleClick}
-                                                                    className="btn btn-warning">Mark As Paid
+                                                                    className="btn btn-warning">Маркирай като Платена
                                                             </button>
                                                         </React.Fragment>
                                                     ) : (

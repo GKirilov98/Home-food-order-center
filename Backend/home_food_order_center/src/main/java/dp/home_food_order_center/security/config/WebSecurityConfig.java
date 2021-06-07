@@ -79,14 +79,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .mvcMatchers("/admin/**")
+                .mvcMatchers("/business/**")
+                .hasAnyAuthority( "ROLE_BUSINESS", "ROLE_ADMIN")
+                .and()
+                .authorizeRequests()
+                .mvcMatchers("/admin/**" )
                 .hasAuthority("ROLE_ADMIN")
+
                 .and()
                 .authorizeRequests()
                 .antMatchers(
                         "/auth/register", "/auth/login",
                         "/category/getAllForSelect",
-                        "/product/getAll")
+                        "/product/getAll", "/report/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated();

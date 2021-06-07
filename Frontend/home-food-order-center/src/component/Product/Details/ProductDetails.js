@@ -42,6 +42,12 @@ export default class ProductDetails extends React.Component {
             quantity: this.state.orderQuantity
         }
 
+        if (bodyObj.quantity === 0){
+            frontendUtils.notifyError("Не е въведено желано количество!")
+            Loading.Remove();
+            return;
+        }
+
         backend.REQ_POST(backend.ORDER_ADD_URL, bodyObj)
             .then(res => res.json())
             .then(res => {
@@ -100,7 +106,7 @@ export default class ProductDetails extends React.Component {
                             <img className="m-2 rounded img-thumbnail image-product-details"
                                  src={this.state.product.imageUrl} alt=""/>
                             {sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",").includes(constants.ROLE_ADMIN) ? (
-                                <Link to={frontend.ADMIN_PRODUCT_EDIT_PATH + this.state.product.id} className="btn btn-warning float-right mt-3 btn-size">Edit</Link>
+                                <Link to={frontend.ADMIN_PRODUCT_EDIT_PATH + this.state.product.id} className="btn btn-warning float-right mt-3 btn-size">Редакция</Link>
                             ) : (<span/>)
                             }
                         </div>
@@ -115,15 +121,14 @@ export default class ProductDetails extends React.Component {
                             </div>
                             <div className="col border m-3 pb-3">
                                 <form className="text-dark mb-5 form-created" onSubmit={this.handleSubmit}>
-                                    <p className="text-dark">Max quantity: {this.state.product.maxQuantity} </p>
+                                    <p className="text-dark">Максимално количество: {this.state.product.maxQuantity} бр.</p>
                                     <input type="number" className="form-control" placeholder="Quantity"
-                                           min='1' max={this.state.product.maxQuantity} onChange={this.handleChange}/>
-                                    <button type="submit" className="btn w3-green w3-hover-blue mt-2">Add to Cart
+                                           min={1} max={this.state.product.maxQuantity} onChange={this.handleChange}/>
+                                    <button type="submit" className="btn w3-green w3-hover-blue mt-2">Добави в количка
                                     </button>
                                 </form>
-                                <Link to="/catalog" className="btn-info btn"> Back to Catalog</Link>
-                                <Link to="/cart/view" className="btn-info btn float-right w3-hover-yellow">View My
-                                    Cart</Link>
+                                <Link to="/catalog" className="btn-info btn">Назад към Каталог</Link>
+                                <Link to="/cart/view" className="btn-info btn float-right w3-hover-yellow">Преглед количка</Link>
                             </div>
 
                         </div>

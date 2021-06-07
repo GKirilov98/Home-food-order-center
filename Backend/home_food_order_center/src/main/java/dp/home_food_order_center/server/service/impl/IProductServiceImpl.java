@@ -4,6 +4,7 @@ import dp.home_food_order_center.server.data.entity.CategoryEntity;
 import dp.home_food_order_center.server.data.entity.ProductEntity;
 import dp.home_food_order_center.server.data.entity.SubcategoryEntity;
 import dp.home_food_order_center.server.data.entity.base.BaseEntity;
+import dp.home_food_order_center.server.data.model.product.ProductModel;
 import dp.home_food_order_center.server.data.view.product.CreateProductView;
 import dp.home_food_order_center.server.data.view.product.ProductDetailsModel;
 import dp.home_food_order_center.server.data.view.product.ProductEditView;
@@ -45,7 +46,7 @@ public class IProductServiceImpl implements IProductService {
     }
 
     @Override
-    public List<ProductListView> getAllByCategoryIdOrSubcategoryId(Long categoryId, Long subcategoryId) throws GlobalServiceException {
+    public List<ProductModel> getAllByCategoryIdOrSubcategoryId(Long categoryId, Long subcategoryId) throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
         //Записване в базата
         try {
@@ -67,7 +68,7 @@ public class IProductServiceImpl implements IProductService {
             }
 
             return entities.stream()
-                    .map(e -> this.modelMapper.map(e, ProductListView.class))
+                    .map(e -> this.modelMapper.map(e, ProductModel.class))
                     .collect(Collectors.toList());
         } catch (GlobalServiceException e) {
             throw e;

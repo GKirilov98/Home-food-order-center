@@ -4,6 +4,7 @@ import backend from "../../../utils/backendUtils";
 import frontend from "../../../utils/frontendUtils";
 import {Loading} from "notiflix";
 import frontendUtils from "../../../utils/frontendUtils";
+import messagesUi from "../../../utils/messages-ui";
 
 export default class ProductCreate extends React.Component {
     constructor(props, context) {
@@ -49,7 +50,6 @@ export default class ProductCreate extends React.Component {
         }
     }
 
-
     componentDidMount() {
         this.callQuery();
     }
@@ -58,7 +58,6 @@ export default class ProductCreate extends React.Component {
         backend.REQ_GET(backend.CATEGORY_GETALL_URL)
             .then(res => res.json())
             .then(res => {
-
                 this.setState({
                     categories: res,
                     fillData: true
@@ -114,24 +113,45 @@ export default class ProductCreate extends React.Component {
                 break;
             case constants.CATEGORY_NAME:
                 index = event.target.value;
-                let subcategoriesS = this.state.categories[index].subcategories;
-                this.setState((prevState) => {
-                    return {
-                        ...prevState,
-                        selectedCategory: prevState.categories[index].id,
-                        subcategories: subcategoriesS
-                    }
-                })
+                if (index != -1){
+                    let subcategoriesS = this.state.categories[index].subcategories;
+                    this.setState((prevState) => {
+                        return {
+                            ...prevState,
+                            selectedCategory: prevState.categories[index].id,
+                            subcategories: subcategoriesS,
+                            selectedSubcategory: null
+                        }
+                    })
+                } else {
+                    this.setState((prevState) => {
+                        return {
+                            ...prevState,
+                            selectedCategory: null,
+                            subcategories: [],
+                            selectedSubcategory: null
+                        }
+                    })
+                }
+
                 break;
             case constants.SUBCATEGORY_NAME:
                 index = event.target.value;
-                debugger;
-                this.setState((prevState) => {
-                    return {
-                        ...prevState,
-                        selectedSubcategory: this.state.subcategories[index].id
-                    }
-                })
+                if (index != -1) {
+                    this.setState((prevState) => {
+                        return {
+                            ...prevState,
+                            selectedSubcategory: prevState.subcategories[index].id
+                        }
+                    })
+                } else {
+                    this.setState((prevState) => {
+                        return {
+                            ...prevState,
+                            selectedSubcategory: null
+                        }
+                    })
+                }
                 break;
         }
     }
@@ -151,16 +171,42 @@ export default class ProductCreate extends React.Component {
             unitPrice: this.state.unitPrice,
         }
 
-        backend.REQ_POST(backend.ADMIN_PRODUCT_CREATE_URL, bodyData)
+        for (const key in bodyData) {
+            if (bodyData[key] == null) {
+                switch (key) {
+                    case 'category': frontendUtils.notifyError("Категория полето е задължително!"); break;
+                    case 'subcategory': frontendUtils.notifyError("Подкатегория полето е задължително!"); break;
+                    case 'imgUrl': frontendUtils.notifyError("Снимка полето е задължително!"); break;
+                    case 'name': frontendUtils.notifyError("Името полето е задължително!"); break;
+                    case 'description': frontendUtils.notifyError("Описание полето е задължително!"); break;
+                    case 'availableQuantity': frontendUtils.notifyError("Налично количество полето е задължително!"); break;
+                    case 'unitPrice': frontendUtils.notifyError("Единична цена полето е задължително!"); break;
+                }
+
+                Loading.Remove();
+                return;
+            }
+        }
+
+        backend.REQ_POST(backend.BUSINESS_PRODUCT_CREATE_URL, bodyData)
             .then(() => {
                 Loading.Remove();
-                frontend.notifyInfo("Register product success!")
+                frontend.notifyInfo(messagesUi.CREATE_PRODUCT_SUCCESS)
                 this.props.history.push(frontend.CATALOG_PATH);
-            }).catch((error) => error)
+            }).catch(err => {
+
+                if (err.message === '401') {
+                    sessionStorage.clear();
+                    frontendUtils.notifyError(messagesUi.INVALID_SESSION);
+                    this.props.history.push(frontendUtils.LOGIN_PATH);
+                }
+            }
+        );
     }
 
-    handleUpload(event) {
+    handleUpload() {
         if (this.state.uploadActive) {
+            Loading.Standard('Loading...',);
             this.setState((prevsState) => {
                 return {
                     ...prevsState,
@@ -182,6 +228,7 @@ export default class ProductCreate extends React.Component {
                 .then(res => res.json())
                 .then(res => {
                     this.setState((prevState) => {
+                        Loading.Remove();
                         return {
                             ...prevState,
                             imgUrl: res.url,
@@ -192,12 +239,21 @@ export default class ProductCreate extends React.Component {
                             uploadActive: true
                         };
                     })
-                });
+                }).catch(err => {
+
+                    if (err.message === '401') {
+                        sessionStorage.clear();
+                        frontendUtils.notifyError(messagesUi.INVALID_SESSION);
+                        this.props.history.push(frontendUtils.LOGIN_PATH);
+                    }
+                }
+            );
         }
     }
 
-    handleDelete(event) {
+    handleDelete() {
         this.setState((prevsState) => {
+            Loading.Standard('Loading...',);
             return {
                 ...prevsState,
                 deleteActive: false
@@ -211,6 +267,7 @@ export default class ProductCreate extends React.Component {
         backend.REQ_POST(backend.IMAGE_DELETE_URL, img)
             .then(res => {
                 this.setState((prevState) => {
+                    Loading.Remove();
                     return {
                         ...prevState,
                         imgUrl: constants.DEFAULT_IMG_URL,
@@ -220,7 +277,15 @@ export default class ProductCreate extends React.Component {
                         uploadActive: true
                     };
                 })
-            })
+            }).catch(err => {
+
+                if (err.message === '401') {
+                    sessionStorage.clear();
+                    frontendUtils.notifyError(messagesUi.INVALID_SESSION);
+                    this.props.history.push(frontendUtils.LOGIN_PATH);
+                }
+            }
+        );
     }
 
     render() {
@@ -249,20 +314,20 @@ export default class ProductCreate extends React.Component {
         return (
             <div className="container col-5 bg-white">
                 <form onSubmit={this.handleSubmit}>
-                    <h3 className='pt-1'>CREATE PRODUCT</h3>
+                    <h3 className='pt-1'>Създай продукт</h3>
                     <div className="row pb-2">
                         <div className="col">
-                            <img className="p-2 image-product" src={this.state.imgUrl} alt="Image product"/>
+                            <img className="p-2 image-product" src={this.state.imgUrl} alt="Име на продукта"/>
                             <div className="row">
                                 <div className="col">
                                     <input type="file" name={constants.IMAGE_NAME} onChange={this.handleChange}/>
                                 </div>
                                 <div className="col-3 pt-1">
                                     <button type="button" className={uploadButtonClass}
-                                            onClick={this.handleUpload}> Upload
+                                            onClick={this.handleUpload}> Качи
                                     </button>
                                     <button type="button" className={deleteButtonClass}
-                                            onClick={this.handleDelete}> Delete
+                                            onClick={this.handleDelete}> Изтрий
                                     </button>
                                 </div>
                             </div>
@@ -275,17 +340,13 @@ export default class ProductCreate extends React.Component {
                                     <div className="tab-pane fade show active" id="home" role="tabpanel"
                                          aria-labelledby="home-tab">
                                         <div className="row pb-2">
-                                            {/*<div className="col-md-3">*/}
-                                            {/*    <label htmlFor={constants.NAME_NAME}>Name</label>*/}
-                                            {/*</div>*/}
                                             <div className="col-md mt-0">
                                                 <input type="text" id={constants.NAME_NAME} name={constants.NAME_NAME}
                                                        required onChange={this.handleChange}
-                                                       min='3' max='25'
-                                                       placeholder="Name of product"/>
+                                                       minLength='3' maxLength='50'
+                                                       placeholder="Име на продукта"/>
                                             </div>
                                         </div>
-
                                         <div className="row pb-2">
                                             <div className="col-md mt-0">
                                                 <div>
@@ -294,11 +355,11 @@ export default class ProductCreate extends React.Component {
                                                             <div className="col">
                                                                 <select onChange={this.handleChange}
                                                                         name={constants.CATEGORY_NAME}>
-                                                                    <option value="-1">Select Category</option>
+                                                                    <option value="-1">Избери Категория</option>
                                                                     {
                                                                         this.state.categories.map((value, index) => {
-                                                                            return <option
-                                                                                value={index}>{value.name}</option>
+                                                                            return <option value={index}>
+                                                                                {value.name}</option>
                                                                         })
                                                                     }
                                                                 </select>
@@ -306,11 +367,11 @@ export default class ProductCreate extends React.Component {
                                                             <div className="col">
                                                                 <select onChange={this.handleChange}
                                                                         name={constants.SUBCATEGORY_NAME}>
-                                                                    <option value="-1">Select Subcategory</option>
+                                                                    <option value="-1">Избери Подкатегория</option>
                                                                     {
                                                                         this.state.subcategories.map((value, index) => {
-                                                                            return <option
-                                                                                value={index}>{value.name}</option>
+                                                                            return <option value={index}>
+                                                                                {value.name}</option>
                                                                         })
                                                                     }
                                                                 </select>
@@ -320,48 +381,32 @@ export default class ProductCreate extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
-
-
                                         <div className="row pb-1">
-                                            {/*<div className="col-md-3">*/}
-                                            {/*    <label htmlFor={constants.DESCRIPTION_NAME}>Description</label>*/}
-                                            {/*</div>*/}
                                             <div className="col-md mt-0">
                                             <textarea id={constants.DESCRIPTION_NAME} name={constants.DESCRIPTION_NAME}
-                                                      minLength='50' maxLength='3999'
-                                                      required onChange={this.handleChange}
-                                                      placeholder="Description"/>
+                                                      minLength='50' maxLength='3999' required
+                                                      onChange={this.handleChange}
+                                                      placeholder="Описание"/>
                                             </div>
                                         </div>
-
                                         <div className="row pb-2">
-                                            {/*<div className="col-md-3">*/}
-                                            {/*    <label htmlFor={constants.AVAILABLE_QUANTITY_NAME}*/}
-                                            {/*    >Max Quantity</label>*/}
-                                            {/*</div>*/}
                                             <div className="col-md mt-0">
                                                 <input type="number" id={constants.AVAILABLE_QUANTITY_NAME}
                                                        min='1'
                                                        name={constants.AVAILABLE_QUANTITY_NAME} required
                                                        onChange={this.handleChange}
-                                                       placeholder="Quantity"/>
+                                                       placeholder="Количество"/>
                                             </div>
                                         </div>
-
                                         <div className="row">
-                                            {/*<div className="col-md-3">*/}
-                                            {/*    <label htmlFor={constants.UNIT_PRICE_NAME}>Unit price</label>*/}
-                                            {/*</div>*/}
                                             <div className="col-md mt-0">
                                                 <input type="number" id={constants.UNIT_PRICE_NAME}
                                                        min='0.1'
                                                        name={constants.UNIT_PRICE_NAME} required
                                                        onChange={this.handleChange} step="any"
-                                                       placeholder="Unit Price"/>
+                                                       placeholder="Единична цена"/>
                                             </div>
                                         </div>
-
-
                                     </div>
                                 </div>
                             </div>
@@ -371,12 +416,10 @@ export default class ProductCreate extends React.Component {
                     )}
 
                     {this.state.deleteActive ? (
-                        <button type="submit" className="btn btn-info m-3 w3-hover-yellow">Create</button>
+                        <button type="submit" className="btn btn-info m-3 w3-hover-yellow">Създай</button>
                     ) : (
                         <span/>
                     )}
-
-
                 </form>
             </div>
         );

@@ -1,6 +1,9 @@
 package dp.home_food_order_center.server.data.model.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dp.home_food_order_center.server.data.model.base.BaseModel;
+import dp.home_food_order_center.server.data.model.category.CategoryModel;
+import dp.home_food_order_center.server.data.model.subcategory.SubcategoryModel;
 
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -11,45 +14,38 @@ import java.math.BigDecimal;
  * Created by: G.Kirilov
  * On: 3/26/2021 8:54 PM
  */
-public class ProductModel implements Serializable {
-    private Long id;
+public class ProductModel extends BaseModel {
     private String imageUrl;
     private String imagePublicId;
     private String name;
     private String description;
     private Long availableQuantity;
     private BigDecimal price;
-    private Long categoryId;
-    private String categoryName;
-    private Long subcategoryId;
-    private String subcategoryName;
+    private CategoryModel category;
+    private SubcategoryModel subcategory;
+//    private Long categoryId;
+//    private String categoryName;
+//    private Long subcategoryId;
+//    private String subcategoryName;
 
     public ProductModel() {
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public Long getSubcategoryId() {
-        return subcategoryId;
-    }
-
-    public void setSubcategoryId(Long subcategoryId) {
-        this.subcategoryId = subcategoryId;
-    }
+//    public Long getCategoryId() {
+//        return categoryId;
+//    }
+//
+//    public void setCategoryId(Long categoryId) {
+//        this.categoryId = categoryId;
+//    }
+//
+//    public Long getSubcategoryId() {
+//        return subcategoryId;
+//    }
+//
+//    public void setSubcategoryId(Long subcategoryId) {
+//        this.subcategoryId = subcategoryId;
+//    }
 
     public String getImageUrl() {
         return imageUrl;
@@ -99,19 +95,19 @@ public class ProductModel implements Serializable {
         this.price = price;
     }
 
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
-
-    public String getSubcategoryName() {
-        return subcategoryName;
-    }
-
-    public void setSubcategoryName(String subcategoryName) {
-        this.subcategoryName = subcategoryName;
-    }
+//    public String getCategoryName() {
+//        return categoryName;
+//    }
+//
+//    public void setCategoryName(String categoryName) {
+//        this.categoryName = categoryName;
+//    }
+//
+//    public String getSubcategoryName() {
+//        return subcategoryName;
+//    }
+//
+//    public void setSubcategoryName(String subcategoryName) {
+//        this.subcategoryName = subcategoryName;
+//    }
 }

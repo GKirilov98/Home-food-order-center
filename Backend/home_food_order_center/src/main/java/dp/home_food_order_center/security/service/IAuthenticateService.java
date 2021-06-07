@@ -16,7 +16,7 @@ public interface IAuthenticateService {
      * @param password
      * @return
      */
-    AuthenticateResponseModel loginUser(String username, String password);
+    AuthenticateResponseModel loginUser(String username, String password) throws GlobalServiceException;
 
     /**
      * Register user, with roles

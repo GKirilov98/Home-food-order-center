@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -53,9 +54,17 @@ public class IAuthenticateServiceImpl implements IAuthenticateService {
     }
 
     @Override
-    public AuthenticateResponseModel loginUser(String username, String password) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password));
+    public AuthenticateResponseModel loginUser(String username, String password) throws GlobalServiceException {
+        Authentication authentication ;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password));
+        } catch (Exception e){
+            String logId = UUID.randomUUID().toString();
+            logger.warn(String.format("%s: Wrong username or password!", logId));
+            throw new GlobalServiceException(logId, "Грешно потребителско име или парола!", "Wrong username or password!");
+        }
+
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
@@ -102,27 +111,18 @@ public class IAuthenticateServiceImpl implements IAuthenticateService {
         // Create new user's account
         UserEntity entityUser = this.modelMapper.map(model, UserEntity.class);
 
-        Set<String> strRoles = model.getRole();
+        Integer userCount = this.userRepository.getCount();
         Set<RoleEntity> roles = new HashSet<>();
+        RoleEntity userRole = roleRepository.findByName(RoleType.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        roles.add(userRole);
 
-        if (strRoles == null) {
-            RoleEntity userRole = roleRepository.findByName(RoleType.ROLE_USER)
+        if (userCount == 0){
+            RoleEntity adminRole = roleRepository.findByName(RoleType.ROLE_ADMIN)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                if (role.equalsIgnoreCase(RoleType.ROLE_ADMIN.name())) {
-                    RoleEntity adminRole = roleRepository.findByName(RoleType.ROLE_ADMIN)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                    roles.add(adminRole);
-                } else {
-                    RoleEntity userRole = roleRepository.findByName(RoleType.ROLE_USER)
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                    roles.add(userRole);
-                }
-            });
+            roles.add(adminRole);
         }
-
+        
         entityUser.setRoles(roles);
         entityUser.setPassword(encoder.encode(model.getPassword()));
         entityUser.setImagePublicId(model.getImagePublicIdentity());

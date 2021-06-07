@@ -8,7 +8,6 @@ import java.util.Set;
 
 @Entity(name = "users")
 public class UserEntity extends BaseEntity {
-    //    private Byte[] image;
     private String imageUrl;
     private String imagePublicId;
     private String firstName;

@@ -17,11 +17,13 @@ const DEFAULT_IMG_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS
 const TOKEN_KEY_NAME = "token";
 const USER_ROLES_KEY_NAME = "roles";
 const ROLE_ADMIN = "ROLE_ADMIN";
+const ROLE_BUSINESS = "ROLE_BUSINESS";
 const ROLE_USER = "ROLE_USER";
 const USERNAME_KEY_NAME = "username";
 const ID_KEY_NAME = "id";
 
 const constants = {
+    ROLE_BUSINESS,
     ROLE_ADMIN,
     ROLE_USER,
     USERNAME_KEY_NAME,

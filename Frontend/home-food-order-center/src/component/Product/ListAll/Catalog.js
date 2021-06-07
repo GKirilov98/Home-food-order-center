@@ -15,10 +15,12 @@ export default class Catalog extends React.Component {
         this.handleClick = this.handleClick.bind(this);
         this.handleClickCollapse = this.handleClickCollapse.bind(this);
         this.loadProducts = this.loadProducts.bind(this);
+        this.handleChange = this.handleChange.bind(this);
         this.state = {
             categories: null,
             loadedCategories: false,
             prevTargetId: -1,
+            originalProducts: null,
             products: null,
             loadedProducts: false
         }
@@ -62,7 +64,8 @@ export default class Catalog extends React.Component {
                 this.setState({
                     categories: res,
                     loadedCategories: true
-                })})
+                })
+            })
             .catch(err => {
                     console.log(err);
                     Loading.Remove();
@@ -75,7 +78,6 @@ export default class Catalog extends React.Component {
             )
     }
 
-
     loadProducts(event) {
         if (event == null) {
             backend.REQ_GET(backend.PODUCT_GETALL_URL)
@@ -83,6 +85,7 @@ export default class Catalog extends React.Component {
                 .then(res => {
                     this.setState({
                         products: res,
+                        originalProducts: res,
                         loadedProducts: true
                     })
                 })
@@ -103,13 +106,14 @@ export default class Catalog extends React.Component {
             backend.REQ_GET(backend.PODUCT_GETALL_URL, params)
                 .then(res => res.json())
                 .then(res => {
-                    this.setState( (prevState) =>{
+                    this.setState((prevState) => {
                         return {
                             ...prevState,
                             products: res,
                             loadedProducts: true
                         }
-                    })})
+                    })
+                })
                 .catch(err => {
                         console.log(err);
                         Loading.Remove();
@@ -120,6 +124,43 @@ export default class Catalog extends React.Component {
                         }
                     }
                 )
+        }
+    }
+
+    handleChange(event) {
+        let id = event.target.id;
+        let value = event.target.value.toLowerCase();
+        if (id === "search") {
+            this.setState((prevState) => {
+                let filteredProducts = prevState.originalProducts.filter(p => p.name.toLowerCase().includes(value))
+                return {
+                    ...prevState,
+                    products: filteredProducts
+                }
+            })
+        } else {
+            let token = value.split(' ');
+            let orderProduct = null;
+            if (token[0] === 'name') {
+                if (token[1] === 'asc') {
+                    orderProduct = this.state.products.sort((p1, p2) => p1.name.localeCompare(p2.name));
+                } else {
+                    orderProduct = this.state.products.sort((p1, p2) => p2.name.localeCompare(p1.name));
+                }
+            } else {
+                if (token[1] === 'asc') {
+                    orderProduct = this.state.products.sort((p1, p2) => p1.price - p2.price);
+                } else {
+                    orderProduct = this.state.products.sort((p1, p2) => p2.price - p1.price);
+                }
+            }
+
+            this.setState((prevState) => {
+                return {
+                    ...prevState,
+                    products: orderProduct
+                }
+            })
         }
     }
 
@@ -168,24 +209,47 @@ export default class Catalog extends React.Component {
                         </nav>
                     </div>
                     <div className="col">
+                        {/*Filter / Order By*/}
+                        <div>
+                            <nav className="navbar navbar-light bg-dark mt-1">
+                                <span className="form-inline">
+                                    <input className="form-control mr-sm-2 mr-2" type="search"
+                                           placeholder="Име на продукт"
+                                           aria-label="Search" id="search" onChange={this.handleChange}/>
+                                           <div className="mr-2">
+                                                 <h5 className="text-white">Подреди по: </h5>
+                                           </div>
+                                           <div>
+                                                <select onChange={this.handleChange} id="order">
+                                                   <option value="NAME ASC">Име Възходящ</option>
+                                                    <option value="NAME DESC">Име Низходящ</option>
+                                                    <option value="AMOUNT ASC">Цена Възходящ</option>
+                                                    <option value="AMOUNT DESC">Цена Низходящ</option>
+                                                </select>
+                                            </div>
+                                </span>
+                            </nav>
+                        </div>
                         {/*{!--Page Content  --}*/}
                         <div id="content">
-
                             <div className="container">
                                 <div className="row mb-4 d-flex justify-content-around">
                                     {this.state.loadedProducts ? (
                                         this.state.products.map((product) => {
-                                                return<div className="col-3 d-flex flex-column text-center catalog-element m-1 mb-3">
-                                                    <img src={product.imageUrl} className="image-product mt-2" alt={product.name}/>
-                                                    <h5><strong>{product.name}</strong> </h5>
+                                                return <div
+                                                    className="col-3 d-flex flex-column text-center catalog-element m-1 mb-3">
+                                                    <img src={product.imageUrl} className="image-product mt-2"
+                                                         alt={product.name}/>
+                                                    <h5><strong>{product.name}</strong></h5>
                                                     <h6><strong>Цена: </strong> {product.price.toFixed(2)}</h6>
-                                                    <Link to={frontend.PRODUCT_DETAILS_PATH + product.id} className="btn btn-info mb-3"> Детайли </Link>
+                                                    <Link to={frontend.PRODUCT_DETAILS_PATH + product.id}
+                                                          className="btn btn-info mb-3"> Детайли </Link>
                                                 </div>
                                             }
                                         )
                                     ) : (
                                         <span>Loading...</span>
-                                    ) }
+                                    )}
                                 </div>
                             </div>
                         </div>

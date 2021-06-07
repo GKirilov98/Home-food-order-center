@@ -26,7 +26,7 @@ public class ProductEditView implements Serializable {
     private String imagePublicId;
     @JsonProperty("name")
     @NotNull
-    @Size(min = 3, max = 25, message = "Name must be between 3 and 25 symbols.")
+    @Size(min = 3, max = 50, message = "Name must be between 3 and 25 symbols.")
     private String name;
     @JsonProperty("description")
     @NotNull

@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Project: home_food_order_center
@@ -20,10 +22,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/product")
 public class ProductController extends BaseController {
-    @Autowired
-    private IProductService productService;
-    @Autowired
-    private ModelMapper modelMapper;
+    private final IProductService productService;
+    private final ModelMapper modelMapper;
+
+    public ProductController(IProductService productService, ModelMapper modelMapper) {
+        this.productService = productService;
+        this.modelMapper = modelMapper;
+    }
 
     /**
      * Get all product for catalog filtered by category, subcategory or both
@@ -36,7 +41,11 @@ public class ProductController extends BaseController {
     public ResponseEntity<?> getAllByCategoryIdOrSubcategoryIdOrBoth(
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long subcategoryId) throws GlobalServiceException {
-        List<ProductListView> list = this.productService.getAllByCategoryIdOrSubcategoryId(categoryId, subcategoryId);
+        List<ProductListView> list = this.productService
+                .getAllByCategoryIdOrSubcategoryId(categoryId, subcategoryId)
+                .stream().map(e -> modelMapper.map(e, ProductListView.class))
+                .sorted(Comparator.comparing(ProductListView::getName))
+                .collect(Collectors.toList());
         return ResponseEntity.ok().body(list);
     }
 

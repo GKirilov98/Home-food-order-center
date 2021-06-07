@@ -21,14 +21,20 @@ export default class Header extends React.Component {
 
 
     handleLogout() {
-        Loading.Standard('Loading...',);
+        // Loading.Standard('Loading...',);
         backendUtils.REQ_GET(backendUtils.LOGOUT_URL)
             .then(res => res.json())
             .then(() => {
                 frontendUtils.notifyInfo("Излязохте успешно!")
-                Loading.Remove();
+                // Loading.Remove();
                 sessionStorage.clear();
                 this.props.history.push("/")
+            })
+            .catch(err => {
+                if (err.message === '401'){
+                    sessionStorage.clear();
+                    this.props.history.push("/auth/login");
+                }
             })
 
     }
@@ -46,22 +52,15 @@ export default class Header extends React.Component {
             // <!-- Navigation -->
             <div >
                 <div className="navbar navbar-expand-md navbar-dark bg-dark mb-0">
-                    {/*<div className="container ">*/}
                     <div>
                         <Link className="navbar-brand" to={frontendUtils.CATALOG_PATH}>Храна за вкъщи</Link>
                     </div>
 
-                    {/*<button type="button" id="sidebarCollapse" className="btn btn-info"*/}
-                    {/*        onClick={this.handleClickToggleSideBar}>*/}
-                    {/*    <Icon.LayoutSidebarInset/>*/}
-                    {/*    <span>Toggle Sidebar</span>*/}
-                    {/*</button>*/}
                     <button className="btn btn-dark d-inline-block d-lg-none ml-auto" type="button"
                             data-toggle="collapse" data-target="#navbarSupportedContent"
                             aria-controls="navbarSupportedContent" aria-expanded="false"
                             aria-label="Toggle navigation">
                     </button>
-
 
                     <div className=" navbar-collapse offset-1" id="navbarResponsive">
                         <ul className="navbar-nav ml-auto ">
@@ -70,7 +69,7 @@ export default class Header extends React.Component {
                                             <span className="pr-2">
                                                 <Icon.Book size="20"/>
                                             </span>
-                                    About Us
+                                    За нас
                                 </Link>
                             </li>
                             {sessionStorage.getItem(constants.USERNAME_KEY_NAME) == null ? (
@@ -96,7 +95,7 @@ export default class Header extends React.Component {
                                     {
                                         sessionStorage.getItem('roles').split(',').map((role) => {
                                             return <React.Fragment>
-                                                {role === constants.ROLE_ADMIN ? (
+                                                {(role === constants.ROLE_BUSINESS || role === constants.ROLE_ADMIN) ? (
                                                     <React.Fragment>
                                                         <li className="nav-item">
                                                             <Link to={frontendUtils.ADMIN_USER_LIST_PATH}
@@ -110,12 +109,19 @@ export default class Header extends React.Component {
                                                                 Касови бележки
                                                             </Link>
                                                         </li>
-                                                        <li className="nav-item">
-                                                            <Link to={frontendUtils.ADMIN_CREATE_PRODUCT_PATH}
-                                                                  className="nav-link">
-                                                                Създай продукт
-                                                            </Link>
-                                                        </li>
+                                                        {(role === constants.ROLE_ADMIN)?(
+                                                            <li className="nav-item">
+                                                                <Link to={frontendUtils.ADMIN_CREATE_PRODUCT_PATH}
+                                                                      className="nav-link">
+                                                                    Създай продукт
+                                                                </Link>
+                                                            </li>
+                                                        ):(
+                                                            <React.Fragment />
+                                                        )
+
+                                                        }
+
                                                     </React.Fragment>
                                                 ) : (
                                                     <React.Fragment/>

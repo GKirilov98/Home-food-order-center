@@ -1,5 +1,6 @@
 package dp.home_food_order_center.server.service;
 
+import dp.home_food_order_center.server.data.model.product.ProductModel;
 import dp.home_food_order_center.server.data.view.product.CreateProductView;
 import dp.home_food_order_center.server.data.view.product.ProductDetailsModel;
 import dp.home_food_order_center.server.data.view.product.ProductEditView;
@@ -22,7 +23,7 @@ public interface IProductService {
      * @return
      * @throws GlobalServiceException
      */
-    List<ProductListView> getAllByCategoryIdOrSubcategoryId(Long categoryId, Long subcategoryId) throws GlobalServiceException;
+    List<ProductModel> getAllByCategoryIdOrSubcategoryId(Long categoryId, Long subcategoryId) throws GlobalServiceException;
 
     /**
      * Returns details of product by id

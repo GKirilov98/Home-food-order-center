@@ -22,8 +22,8 @@ import java.util.UUID;
  * On: 3/29/2021
  */
 @Service
-public class ImageServiceImpl implements IImageService {
-    private final Logger logger = LogManager.getLogger(ImageServiceImpl.class);
+public class IImageServiceImpl implements IImageService {
+    private final Logger logger = LogManager.getLogger(IImageServiceImpl.class);
 
     private static final String API_KEY = "546934454118545";
     private static final String API_SECRET = "EYAqkSIRPYaNWhddbqOYRAShYQ4";

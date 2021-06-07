@@ -52,7 +52,6 @@ export default class Cart extends React.Component {
             )
     }
 
-
     handleClick(event) {
         let id = event.target.id;
         Loading.Standard('Loading...',);
@@ -74,7 +73,6 @@ export default class Cart extends React.Component {
             )
     }
 
-
     componentDidMount() {
         this.loadData();
     }
@@ -84,6 +82,7 @@ export default class Cart extends React.Component {
         backend.REQ_GET(backend.RECEIPT_GET_BY_STATUS_SHOPPING_URL)
             .then(res => res.json())
             .then(res => {
+                debugger;
                 Loading.Remove();
                 this.setState({
                         receipt: res[0]
@@ -110,33 +109,36 @@ export default class Cart extends React.Component {
                             <h4>Количка</h4>
                         </div>
                         {this.state.receipt != null ? (
-                            this.state.receipt.orders.map((value) => {
-                                return <div
-                                    className="item-cart-border row mr-1 ml-1 d-flex flex-row justify-content-between align-items-center bg-white mt-4 px-3 rounded ">
-                                    <div className="col-sm-2">
-                                        <img className="rounded" src={value.product.imageUrl} width="70" alt=""/>
+                            this.state.receipt.orders != null ? (
+                                this.state.receipt.orders.map((value) => {
+                                    return <div
+                                        className="item-cart-border row mr-1 ml-1 d-flex flex-row justify-content-between align-items-center bg-white mt-4 px-3 rounded ">
+                                        <div className="col-sm-2">
+                                            <img className="rounded" src={value.product.imageUrl} width="70" alt=""/>
+                                        </div>
+                                        <div className="col-sm-2 d-flex flex-column align-items-center product-details">
+                                            <h4>{value.product.name}</h4>
+                                        </div>
+                                        <div className="col-sm-2 d-flex flex-row align-items-center qty">
+                                            <h6 className="text-grey"> Количество: {value.neededQuantity}</h6>
+                                        </div>
+                                        <div className="col-sm-2 d-flex flex-row align-items-center qty">
+                                            <h6>Ед. цена: {value.product.price.toFixed(2)} лв.</h6>
+                                        </div>
+                                        <div className="col-sm-2">
+                                            <h6 className="text-grey">Обща цена: {value.amount.toFixed(2)}</h6>
+                                        </div>
+                                        <div className="col-sm-1 d-flex align-items-center">
+                                            <button className="btn btn-danger w3-hover-border-black "
+                                                    onClick={this.handleClick} id={value.id}>
+                                                Delete
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="col-sm-2 d-flex flex-column align-items-center product-details">
-                                        <h4>{value.product.name}</h4>
-                                    </div>
-                                    <div className="col-sm-2 d-flex flex-row align-items-center qty">
-                                        <h6 className="text-grey"> Количество: {value.neededQuantity}</h6>
-                                    </div>
-                                    <div className="col-sm-2 d-flex flex-row align-items-center qty">
-                                        <h6>Ед. цена: {value.product.price.toFixed(2)} лв.</h6>
-                                    </div>
-                                    <div className="col-sm-2">
-                                        <h6 className="text-grey">Обща цена: {value.amount.toFixed(2)}</h6>
-                                    </div>
-                                    <div className="col-sm-1 d-flex align-items-center">
-                                        <button className="btn btn-danger w3-hover-border-black "
-                                                onClick={this.handleClick} id={value.id}>
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            })
-
+                                })
+                            ):(
+                                <React.Fragment />
+                            )
                         ) : (
                             <span>Loading...</span>
                         )

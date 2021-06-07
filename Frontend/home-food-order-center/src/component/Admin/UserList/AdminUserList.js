@@ -5,6 +5,7 @@ import constants from "../../../utils/constants";
 import {Link} from "react-router-dom";
 import frontendUtils from "../../../utils/frontendUtils";
 import frontend from "../../../utils/frontendUtils";
+import messagesUi from "../../../utils/messages-ui";
 
 export default class AdminUserList extends React.Component {
     constructor(props, context) {
@@ -22,35 +23,76 @@ export default class AdminUserList extends React.Component {
         }
     }
 
-    static getDerivedStateFromProps(props, state) {
+    static getDerivedStateFromProps(props) {
         if (sessionStorage.getItem(constants.USERNAME_KEY_NAME) == null) {
             props.history.push(frontend.LOGIN_PATH);
-        }else {
-            let isAdmin = false
+        } else {
+            let isBusiness = false;
+            let isAdmin = false;
             sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
-                .forEach((role) => {if (role == constants.ROLE_ADMIN){
-                    isAdmin = true;
-                }} )
-            if (!isAdmin){
+                .forEach((role) => {
+                    if (role === constants.ROLE_BUSINESS) {
+                        isBusiness = true;
+                    } else if (role === constants.ROLE_ADMIN) {
+                        isAdmin = true;
+                    }
+                })
+            if (!isBusiness && !isAdmin) {
                 frontendUtils.notifyError("Нямате необходимите права за достап!");
                 props.history.push(frontendUtils.CATALOG_PATH);
             }
         }
     }
 
-    handleClick(event){
+    handleClick(event) {
         Loading.Standard('Loading...',);
         let idTarget = event.target.id;
         let nameTarget = event.target.name;
         debugger;
-        switch (nameTarget){
+        switch (nameTarget) {
             case "remove-admin":
                 backend.REQ_POST(backend.ADMIN_REMOVE_ADMIN_URL + idTarget)
                     .then(this.loadUsers)
+                    .catch(err => {
+                        if (err.message === '401') {
+                            sessionStorage.clear();
+                            frontendUtils.notifyError(messagesUi.INVALID_SESSION);
+                            this.props.history.push(frontendUtils.LOGIN_PATH);
+                        }
+                    })
                 break
             case "make-admin":
                 backend.REQ_POST(backend.ADMIN_MAKE_ADMIN_URL + idTarget)
                     .then(this.loadUsers)
+                    .catch(err => {
+                        if (err.message === '401') {
+                            sessionStorage.clear();
+                            frontendUtils.notifyError(messagesUi.INVALID_SESSION);
+                            this.props.history.push(frontendUtils.LOGIN_PATH);
+                        }
+                    })
+                break;
+            case "remove-business":
+                backend.REQ_POST(backend.BUSINESS_REMOVE_BUSINESS_URL + idTarget)
+                    .then(this.loadUsers)
+                    .catch(err => {
+                        if (err.message === '401') {
+                            sessionStorage.clear();
+                            frontendUtils.notifyError(messagesUi.INVALID_SESSION);
+                            this.props.history.push(frontendUtils.LOGIN_PATH);
+                        }
+                    })
+                break
+            case "make-business":
+                backend.REQ_POST(backend.BUSINESS_MAKE_BUSINESS_URL + idTarget)
+                    .then(this.loadUsers)
+                    .catch(err => {
+                        if (err.message === '401') {
+                            sessionStorage.clear();
+                            frontendUtils.notifyError(messagesUi.INVALID_SESSION);
+                            this.props.history.push(frontendUtils.LOGIN_PATH);
+                        }
+                    })
                 break;
         }
     }
@@ -105,7 +147,7 @@ export default class AdminUserList extends React.Component {
             orderBy: this.state.orderBy != null ? (this.state.orderBy) : (""),
         }
 
-        backend.REQ_GET(backend.ADMIN_USER_LIST_PATH, objParam)
+        backend.REQ_GET(backend.BUSINESS_USER_LIST_PATH, objParam)
             .then(res => res.json())
             .then(res => {
                 Loading.Remove();
@@ -115,17 +157,23 @@ export default class AdminUserList extends React.Component {
                         users: res
                     }
                 })
-
+            })
+            .catch(err => {
+                if (err.message === '401') {
+                    sessionStorage.clear();
+                    frontendUtils.notifyError(messagesUi.INVALID_SESSION);
+                    this.props.history.push(frontendUtils.LOGIN_PATH);
+                }
             })
     }
 
     componentDidMount() {
-       this.loadUsers();
+        this.loadUsers();
     }
 
-    loadUsers(){
+    loadUsers() {
         Loading.Standard('Loading...',);
-        backend.REQ_GET(backend.ADMIN_USER_LIST_PATH)
+        backend.REQ_GET(backend.BUSINESS_USER_LIST_PATH)
             .then(res => res.json())
             .then(res => {
                 Loading.Remove();
@@ -133,9 +181,27 @@ export default class AdminUserList extends React.Component {
                     users: res
                 })
             })
+            .catch(err => {
+                if (err.message === '401') {
+                    sessionStorage.clear();
+                    frontendUtils.notifyError(messagesUi.INVALID_SESSION);
+                    this.props.history.push(frontendUtils.LOGIN_PATH);
+                }
+            })
     }
 
     render() {
+        let isAdmin = false;
+        let isBusiness = false;
+        sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
+            .forEach((role) => {
+                if (role === constants.ROLE_BUSINESS) {
+                    isBusiness = true;
+                } else if (role === constants.ROLE_ADMIN) {
+                    isAdmin = true;
+                }
+            })
+
         return (
             <div className="container pt-2 mt-3 bg-white">
                 <form className="pb-2" onSubmit={this.handleSubmit}>
@@ -179,14 +245,20 @@ export default class AdminUserList extends React.Component {
                             <th scope="col">Потребител</th>
                             <th scope="col">Email</th>
                             <th scope="col">Тел. номер</th>
-                            <th scope="col"></th>
-                            <th scope="col"></th>
-                            <th scope="col"></th>
+                            {(isAdmin)?(
+                                <th scope="col"/>
+                            ):(
+                                <React.Fragment />
+                            )}
+                            <th scope="col"/>
+                            <th scope="col"/>
+                            <th scope="col"/>
                         </tr>
                         </thead>
                         <tbody>
                         {this.state.users != null ? (
                             this.state.users.map((user, index) => {
+
                                 return <tr>
                                     <th scope="row">{index + 1}</th>
                                     <td>
@@ -195,28 +267,73 @@ export default class AdminUserList extends React.Component {
                                     <td>{user.username}</td>
                                     <td>{user.email}</td>
                                     <td>{user.phoneNumber}</td>
-                                    <td>
-                                        <Link to={frontendUtils.USER_EDIT_PATH + user.username}
-                                              className="btn btn-warning m-0">Edit</Link>
-                                    </td>
+                                    {(isAdmin)?(
+                                        <td>
+                                            <Link to={frontendUtils.USER_EDIT_PATH + user.username}
+                                                  className="btn btn-warning m-0">Edit</Link>
+                                        </td>
+                                    ):(
+                                        <React.Fragment />
+                                    )}
+
                                     <td>
                                         <Link to={frontendUtils.USER_PROFILE_PATH + user.username}
                                               className="btn btn-info m-0">View</Link>
                                     </td>
-                                    {user.roles.includes(constants.ROLE_ADMIN) ? (
-                                        <td>
-                                            <button className="btn btn-danger m-0" id={user.id}
-                                                    name="remove-admin" onClick={this.handleClick}>Remove Admin</button>
-                                        </td>
+                                    {isAdmin ? (
+                                        user.roles.includes(constants.ROLE_ADMIN) ? (
+                                            <td>
+                                                <button className="btn btn-danger m-0" id={user.id}
+                                                        name="remove-admin" onClick={this.handleClick}>Премахни Админ
+                                                </button>
+                                            </td>
 
-                                    ) : (<td>
-                                            <button className="btn btn-primary m-0" id={user.id}
-                                                    name="make-admin" onClick={this.handleClick}>Make Admin</button>
-                                        </td>
-                                    )
+                                        ) : (<td>
+                                                <button className="btn btn-primary m-0" id={user.id}
+                                                        name="make-admin" onClick={this.handleClick}>Направи Админ
+                                                </button>
+                                            </td>
+                                        )
+                                    ) : (
+                                        <React.Fragment/>
+                                    )}
 
-                                    }
-
+                                    {isAdmin ? (
+                                        user.roles.includes(constants.ROLE_BUSINESS) ? (
+                                            <td>
+                                                <button className="btn btn-danger m-0" id={user.id}
+                                                        name="remove-business" onClick={this.handleClick}>Премахни
+                                                    Бизнес
+                                                </button>
+                                            </td>
+                                        ) : (
+                                            <td>
+                                                <button className="btn btn-primary m-0" id={user.id}
+                                                        name="make-business" onClick={this.handleClick}>Добави Бизнес
+                                                </button>
+                                            </td>
+                                        )
+                                    ) : (
+                                        user.roles.includes(constants.ROLE_ADMIN) ? (
+                                            <React.Fragment/>
+                                        ) : (
+                                            user.roles.includes(constants.ROLE_BUSINESS) ? (
+                                                <td>
+                                                    <button className="btn btn-danger m-0" id={user.id}
+                                                            name="remove-business" onClick={this.handleClick}>Премахни
+                                                        Бизнес
+                                                    </button>
+                                                </td>
+                                            ) : (
+                                                <td>
+                                                    <button className="btn btn-primary m-0" id={user.id}
+                                                            name="make-business" onClick={this.handleClick}>Добави
+                                                        Бизнес
+                                                    </button>
+                                                </td>
+                                            )
+                                        )
+                                    )}
                                 </tr>
                             })
                         ) : (

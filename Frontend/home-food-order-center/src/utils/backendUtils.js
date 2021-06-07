@@ -1,6 +1,6 @@
 import frontendUtils from "./frontendUtils";
-import axios from "axios";
 import constants from "./constants";
+import {Loading} from "notiflix";
 
 
 //Основния път
@@ -22,31 +22,54 @@ const RECEIPT_GETALL_URL = ROOT_URL + "/receipt/getAll";
 const RECEIPT_GET_BY_ID_URL = ROOT_URL + "/receipt/getById/";
 const USER_PROFILE_PATH = ROOT_URL + "/user/profile/";
 const USER_EDIT_PATH = ROOT_URL + "/user/edit/";
-
+//Админ панел
 const ADMIN_USER_DELETE_PATH = ROOT_URL + "/admin/user/delete/";
-const ADMIN_PRODUCT_CREATE_URL = ROOT_URL + "/admin/product/create";
-const ADMIN_USER_LIST_PATH = ROOT_URL + "/admin/user/getAll";
-const ADMIN_PRODUCT_EDIT_PATH = ROOT_URL + "/admin/product/edit/";
 const ADMIN_MAKE_ADMIN_URL = ROOT_URL + "/admin/makeAdmin/";
 const ADMIN_REMOVE_ADMIN_URL = ROOT_URL + "/admin/removeAdmin/";
-const ADMIN_RECEIPT_GETALL_URL = ROOT_URL + "/admin/receipt/getAll";
-const ADMIN_RECEIPT_PAID_URL = ROOT_URL + "/admin/receipt/paid/";
-
+//Бизнес потребител панел
+const BUSINESS_PRODUCT_EDIT_PATH = ROOT_URL + "/business/product/edit/";
+const BUSINESS_RECEIPT_GETALL_URL = ROOT_URL + "/business/receipt/getAll";
+const BUSINESS_RECEIPT_PAID_URL = ROOT_URL + "/business/receipt/paid/";
+const BUSINESS_USER_LIST_PATH = ROOT_URL + "/business/user/getAll";
+const BUSINESS_PRODUCT_CREATE_URL = ROOT_URL + "/business/product/create";
+const BUSINESS_MAKE_BUSINESS_URL = ROOT_URL + "/business/makeBusiness/";
+const BUSINESS_REMOVE_BUSINESS_URL = ROOT_URL + "/business/removeBusiness/";
 
 function handleErrors(response) {
-    if (!response.ok && response.status == '500') {
-        response.json()
-            .then((data) => {
-                frontendUtils.notifyError(data.message)
-            })
-        throw Error(response.status);
+    if (!response.ok) {
+        if (response.status === 500) {
+            response.json()
+                .then((data) => {
+                    Loading.Remove();
+                    frontendUtils.notifyError(data.message)
+                })
+        } else if (response.status === 400) {
+            response.json()
+                .then((data) => {
+                    Loading.Remove();
+                    frontendUtils.notifyError(data.errors[0].defaultMessage)
+                })
+        } else if (response.status === 401 && response.statusText.length === 0) {
+            response.json()
+                .then(() => {
+                    Loading.Remove();
+                    frontendUtils.notifyError("Вашата сесия е изтекла, моля влезте в профила си отново!");
+                })
+        }
+
+        if (response.status !== 403) {
+            throw Error(response.status);
+        }
+
     }
 
+    Loading.Remove();
     return response;
 }
 
 //Заявки към backend
 const REQ_POST = function (url, data) {
+    Loading.Standard('Loading...');
     return fetch(url, {
         method: "POST", // *GET, POST, PUT, DELETE, etc.
         mode: "cors", // no-cors, cors, *same-origin
@@ -72,6 +95,7 @@ const REQ_POST = function (url, data) {
 // };
 
 const REQ_GET = function (url, params) {
+    Loading.Standard('Loading...',);
     if (params == null) {
         return fetch(url, {
             method: "GET", // *GET, POST, PUT, DELETE, etc.
@@ -100,7 +124,6 @@ const REQ_GET = function (url, params) {
 };
 
 const backend = {
-    ADMIN_USER_LIST_PATH,
     USER_PROFILE_PATH,
     RECEIPT_GET_BY_ID_URL,
     RECEIPT_GETALL_URL,
@@ -113,7 +136,6 @@ const backend = {
     CATEGORY_GETALL_URL,
     IMAGE_DELETE_URL,
     IMAGE_CREATE_URL,
-    ADMIN_PRODUCT_CREATE_URL,
     LOGOUT_URL,
     LOGIN_URL,
     REGISTER_URL,
@@ -124,8 +146,12 @@ const backend = {
     ADMIN_USER_DELETE_PATH,
     ADMIN_MAKE_ADMIN_URL,
     ADMIN_REMOVE_ADMIN_URL,
-    ADMIN_RECEIPT_GETALL_URL,
-    ADMIN_RECEIPT_PAID_URL,
-    ADMIN_PRODUCT_EDIT_PATH
+    BUSINESS_PRODUCT_CREATE_URL,
+    BUSINESS_USER_LIST_PATH,
+    BUSINESS_RECEIPT_GETALL_URL,
+    BUSINESS_RECEIPT_PAID_URL,
+    BUSINESS_PRODUCT_EDIT_PATH,
+    BUSINESS_MAKE_BUSINESS_URL,
+    BUSINESS_REMOVE_BUSINESS_URL
 };
 export default backend;

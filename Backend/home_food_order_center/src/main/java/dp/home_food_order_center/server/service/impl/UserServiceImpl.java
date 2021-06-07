@@ -66,6 +66,8 @@ public class UserServiceImpl implements IUserService {
             List<AuthenticateResponseModel> res = new ArrayList<>();
             res.add(authenticateService.loginUser(username, password));
             return res;
+        } catch (GlobalServiceException e) {
+            throw e;
         } catch (Exception e) {
             logger.error(String.format("%s: Unexpected login service error!", logId), e);
             throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected service error!");
@@ -159,12 +161,13 @@ public class UserServiceImpl implements IUserService {
 
             List<UserModel> models = new ArrayList<>();
             UserModel model = this.modelMapper.map(userEntity, UserModel.class);
-            //Ако не е текущия логнат потребител или админ - се трият касовите бележки
+            //Ако не е текущия логнат потребител или админ или бизнес потребител - се трият касовите бележки
             if (!loggedInUser.getName().equals(username)) {
-                boolean contains = loggedInUser.getAuthorities().stream()
+                Set<String> loggedInRoles = loggedInUser.getAuthorities().stream()
                         .map(Object::toString)
-                        .collect(Collectors.toSet())
-                        .contains(RoleType.ROLE_ADMIN.toString());
+                        .collect(Collectors.toSet());
+                boolean contains = loggedInRoles.contains(RoleType.ROLE_ADMIN.toString()) ||
+                        loggedInRoles.contains(RoleType.ROLE_BUSINESS.toString());
                 if (!contains) {
                     model.getReceipts().clear();
                 }
@@ -184,9 +187,7 @@ public class UserServiceImpl implements IUserService {
         String logId = UUID.randomUUID().toString();
         //Проверка с базата
         try {
-            logger.info(String.format("%s: Starting editUser service!", logId));
-//            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//            UserDetailsImpl currLoggedUser = (UserDetailsImpl) principal;
+            logger.info(String.format("%s: Starting editUser service!", logId));;
             Authentication loggedInUser = SecurityContextHolder.getContext().getAuthentication();
             if (!loggedInUser.getName().equals(username)) {
                 boolean contains = loggedInUser.getAuthorities().stream()
@@ -198,17 +199,6 @@ public class UserServiceImpl implements IUserService {
                     throw new GlobalServiceException(logId, "Нямате необходимите права за промяна", "You do not have permission for this operation!");
                 }
             }
-
-
-//            Set<String> authorities = currLoggedUser.getAuthorities().stream().map(Object::toString)
-//                    .collect(Collectors.toSet());
-//            //Ако не логнатия потребител или админ
-//            if (!authorities.contains(RoleType.ROLE_ADMIN.toString())) {
-//                if (!currLoggedUser.getId().equals(id)) {
-//                    logger.error(String.format("%s: You do not have permission for this operation!", logId));
-//                    throw new GlobalServiceException(logId, "Нямате необходимите права за промяна", "You do not have permission for this operation!");
-//                }
-//            }
 
             UserEntity userEntity = this.userRepository.findByUsername(username).orElse(null);
 
@@ -256,15 +246,8 @@ public class UserServiceImpl implements IUserService {
         //Проверка с базата
         try {
             logger.info(String.format("%s: Starting getAllUsers service!", logId));
-//            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//            UserDetailsImpl currLoggedUser = (UserDetailsImpl) principal;
-//
-//            Set<String> authorities = currLoggedUser.getAuthorities().stream().map(Object::toString)
-//                    .collect(Collectors.toSet());
-//            if (!authorities.contains(RoleType.ROLE_ADMIN.toString())) {
-//                logger.error(String.format("%s: You do not have permission for this operation!", logId));
-//                throw new GlobalServiceException(logId, "Нямате необходимите права за тази операция!", "You do not have permission for this operation!");
-//            }
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            UserDetailsImpl currLoggedUser = (UserDetailsImpl) principal;
 
             if (username == null) {
                 username = "";
@@ -299,6 +282,7 @@ public class UserServiceImpl implements IUserService {
             List<UserListModel> list = this.userRepository.findAll()
                     .stream()
                     .filter(e ->
+                            !e.getUsername().equals(currLoggedUser.getUsername()) &&
                             e.getUsername().contains(finalUsername) &&
                                     e.getEmail().contains(finalEmail) &&
                                     e.getPhoneNumber().contains(finalPhoneNumber))
@@ -371,20 +355,10 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public String makeAdminByUserId(Long id) throws GlobalServiceException {
+    public String makeBusinessByUserId(Long id) throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
         try {
-            logger.info(String.format("%s: Starting makeAdminByUserId service!", logId));
-//
-//            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//            UserDetailsImpl currLoggedUser = (UserDetailsImpl) principal;
-//
-//            Set<String> authorities = currLoggedUser.getAuthorities().stream().map(Object::toString)
-//                    .collect(Collectors.toSet());
-//            if (!authorities.contains(RoleType.ROLE_ADMIN.toString())) {
-//                logger.error(String.format("%s: You do not have permission for this operation!", logId));
-//                throw new GlobalServiceException(logId, "Нямате необходимите права за промяна", "You do not have permission for this operation!");
-//            }
+            logger.info(String.format("%s: Starting makeBusinessByUserId service!", logId));
 
             UserEntity userEntity = this.userRepository.findById(id).orElse(null);
             if (userEntity == null) {
@@ -392,11 +366,80 @@ public class UserServiceImpl implements IUserService {
                 throw new GlobalServiceException(logId, "Не мога да намеря user  с това id", "Could not user with that id");
             }
 
-            RoleEntity roleEntity = this.roleRespository.findByName(RoleType.ROLE_ADMIN).orElse(null);
+            RoleEntity roleEntity = this.roleRespository.findByName(RoleType.ROLE_BUSINESS).orElseThrow( () ->  new NoSuchElementException("Missing Role!"));
             userEntity.getRoles().add(roleEntity);
             this.userRepository.saveAndFlush(userEntity);
 
-            return "Successfully created admin!";
+            return "Successfully added role \"BUSINESS\"!";
+        } catch (GlobalServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error(String.format("%s: Unexpected makeBusinessByUserId service error!", logId), e);
+            throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected makeBusinessByUserId service error!");
+        } finally {
+            logger.info(String.format("%s: Finished makeBusinessByUserId service!", logId));
+        }
+    }
+
+    @Override
+    public String removeBusinessByUserId(Long id) throws GlobalServiceException {
+        String logId = UUID.randomUUID().toString();
+        try {
+            logger.info(String.format("%s: Starting removeBusinessByUserId service!", logId));
+
+            UserEntity userEntity = this.userRepository.findById(id).orElse(null);
+            if (userEntity == null) {
+                logger.error(String.format("%s: Couldn't found user with this id! %d", logId, id));
+                throw new GlobalServiceException(logId, "Не мога да намеря user  с това id", "Could not user with that id");
+            }
+
+            RoleEntity roleAdmin = this.roleRespository.findByName(RoleType.ROLE_ADMIN).orElse(null);
+            if (userEntity.getRoles().contains(roleAdmin)) {
+                Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+                UserDetailsImpl currLoggedUser = (UserDetailsImpl) principal;
+
+                Set<String> authorities = currLoggedUser.getAuthorities().stream().map(Object::toString)
+                        .collect(Collectors.toSet());
+                if (!authorities.contains(RoleType.ROLE_ADMIN.toString())) {
+                    if (!currLoggedUser.getId().equals(id)) {
+                        logger.error(String.format("%s: You do not have permission for this operation!", logId));
+                        throw new GlobalServiceException(logId, "Нямате необходимите права за промяна", "You do not have permission for this operation!");
+                    }
+                }
+            }
+
+            RoleEntity roleEntity = this.roleRespository.findByName(RoleType.ROLE_BUSINESS).orElseThrow( () ->  new NoSuchElementException("Missing Role!"));
+            userEntity.getRoles().remove(roleEntity);
+            this.userRepository.saveAndFlush(userEntity);
+
+            return "Successfully removed role \"ADMIN\"!";
+        } catch (GlobalServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error(String.format("%s: Unexpected removeBusinessByUserId service error!", logId), e);
+            throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected removeBusinessByUserId service error!");
+        } finally {
+            logger.info(String.format("%s: Finished removeBusinessByUserId service!", logId));
+        }
+    }
+
+    @Override
+    public String makeAdminByUserId(Long id) throws GlobalServiceException {
+        String logId = UUID.randomUUID().toString();
+        try {
+            logger.info(String.format("%s: Starting makeAdminByUserId service!", logId));
+
+            UserEntity userEntity = this.userRepository.findById(id).orElseThrow( () ->  new NoSuchElementException("Missing Role!"));
+            if (userEntity == null) {
+                logger.error(String.format("%s: Couldn't found user with this id! %d", logId, id));
+                throw new GlobalServiceException(logId, "Не мога да намеря user  с това id", "Could not user with that id");
+            }
+
+            RoleEntity roleEntity = this.roleRespository.findByName(RoleType.ROLE_ADMIN).orElseThrow( () ->  new NoSuchElementException("Missing Role!"));
+            userEntity.getRoles().add(roleEntity);
+            this.userRepository.saveAndFlush(userEntity);
+
+            return "Successfully added admin role!";
         } catch (GlobalServiceException e) {
             throw e;
         } catch (Exception e) {
@@ -412,14 +455,6 @@ public class UserServiceImpl implements IUserService {
         String logId = UUID.randomUUID().toString();
         try {
             logger.info(String.format("%s: Starting removeAdminByUserId service!", logId));
-//            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//            UserDetailsImpl currLoggedUser = (UserDetailsImpl) principal;
-//            Set<String> authorities = currLoggedUser.getAuthorities().stream().map(Object::toString)
-//                    .collect(Collectors.toSet());
-//            if (!authorities.contains(RoleType.ROLE_ADMIN.toString())) {
-//                logger.error(String.format("%s: You do not have permission for this operation!", logId));
-//                throw new GlobalServiceException(logId, "Нямате необходимите права за промяна", "You do not have permission for this operation!");
-//            }
 
             UserEntity userEntity = this.userRepository.findById(id).orElse(null);
             if (userEntity == null) {
@@ -427,11 +462,11 @@ public class UserServiceImpl implements IUserService {
                 throw new GlobalServiceException(logId, "Не мога да намеря user  с това id", "Could not user with that id");
             }
 
-            RoleEntity roleEntity = this.roleRespository.findByName(RoleType.ROLE_ADMIN).orElse(null);
+            RoleEntity roleEntity = this.roleRespository.findByName(RoleType.ROLE_ADMIN).orElseThrow( () ->  new NoSuchElementException("Missing Role!"));
             userEntity.getRoles().remove(roleEntity);
             this.userRepository.saveAndFlush(userEntity);
 
-            return "Successfully removed admin!";
+            return "Successfully removed role \"ADMIN\" !";
         } catch (GlobalServiceException e) {
             throw e;
         } catch (Exception e) {

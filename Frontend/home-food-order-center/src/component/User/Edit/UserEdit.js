@@ -22,23 +22,25 @@ export default class UserEdit extends React.Component {
         }
     }
 
-    static getDerivedStateFromProps(props, state) {
+    static getDerivedStateFromProps(props) {
         if (sessionStorage.getItem(constants.USERNAME_KEY_NAME) == null) {
-            frontendUtils.notifyError("Моля влезте в системата!");
             props.history.push(frontend.LOGIN_PATH);
-        } else if (sessionStorage.getItem(constants.ID_KEY_NAME) != props.match.params.id){
-            let isAdmin = false
+        } else {
+            let isBusiness = false;
+            let isAdmin = false;
             sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
-                .forEach((role) => {if (role == constants.ROLE_ADMIN){
-                    isAdmin = true;
-                }} )
-            if (!isAdmin){
+                .forEach((role) => {
+                    if (role === constants.ROLE_BUSINESS) {
+                        isBusiness = true;
+                    } else if (role === constants.ROLE_ADMIN) {
+                        isAdmin = true;
+                    }
+                })
+            if (!isBusiness && !isAdmin) {
                 frontendUtils.notifyError("Нямате необходимите права за достап!");
                 props.history.push(frontendUtils.CATALOG_PATH);
             }
         }
-
-
     }
 
     handleDelete(event) {

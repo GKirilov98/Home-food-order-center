@@ -21,16 +21,21 @@ export default class AdminRecipeList extends React.Component {
         }
     }
 
-    static getDerivedStateFromProps(props, state) {
+    static getDerivedStateFromProps(props) {
         if (sessionStorage.getItem(constants.USERNAME_KEY_NAME) == null) {
             props.history.push(frontend.LOGIN_PATH);
-        }else {
-            let isAdmin = false
+        } else {
+            let isBusiness = false;
+            let isAdmin = false;
             sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
-                .forEach((role) => {if (role == constants.ROLE_ADMIN){
-                    isAdmin = true;
-                }} )
-            if (!isAdmin){
+                .forEach((role) => {
+                    if (role === constants.ROLE_BUSINESS) {
+                        isBusiness = true;
+                    } else if (role === constants.ROLE_ADMIN) {
+                        isAdmin = true;
+                    }
+                })
+            if (!isBusiness && !isAdmin) {
                 frontendUtils.notifyError("Нямате необходимите права за достап!");
                 props.history.push(frontendUtils.CATALOG_PATH);
             }
@@ -48,7 +53,7 @@ export default class AdminRecipeList extends React.Component {
             orderBy: this.state.orderBy != null ? (this.state.orderBy) : ("")
         }
 
-        backend.REQ_GET(backend.ADMIN_RECEIPT_GETALL_URL, objParams)
+        backend.REQ_GET(backend.BUSINESS_RECEIPT_GETALL_URL, objParams)
             .then(res => res.json())
             .then(res => {
                 this.setState((prevState) => {
@@ -110,7 +115,7 @@ export default class AdminRecipeList extends React.Component {
     }
 
     componentDidMount() {
-        backend.REQ_GET(backend.ADMIN_RECEIPT_GETALL_URL)
+        backend.REQ_GET(backend.BUSINESS_RECEIPT_GETALL_URL)
             .then(res => res.json())
             .then(res => {
                 this.setState({
@@ -137,7 +142,6 @@ export default class AdminRecipeList extends React.Component {
                                     <option value="PAID">Paid</option>
                                 </select>
                             </div>
-
                         </div>
                         <div className="col-2">
                             <label htmlFor={constants.USERNAME_NAME}>Потребител</label>
@@ -174,8 +178,6 @@ export default class AdminRecipeList extends React.Component {
                         </div>
                     </div>
                 </form>
-
-
                 <div className="row">
                     <table className="table table-hover">
                         <thead className="thead-dark">

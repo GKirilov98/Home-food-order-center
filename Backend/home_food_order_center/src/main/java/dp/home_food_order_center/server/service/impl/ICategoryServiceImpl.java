@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import dp.home_food_order_center.server.data.entity.CategoryEntity;
 import dp.home_food_order_center.server.data.entity.SubcategoryEntity;
+import dp.home_food_order_center.server.data.model.category.CategoryModel;
 import dp.home_food_order_center.server.data.view.category.CategorySelectView;
 import dp.home_food_order_center.server.data.view.subcategory.SubcategorySelectView;
 import dp.home_food_order_center.server.error.GlobalServiceException;
@@ -37,18 +38,13 @@ public class ICategoryServiceImpl implements ICategoryService {
     }
 
     @Override
-    public List<CategorySelectView> getAllForSelect() throws GlobalServiceException {
+    public List<CategoryModel> getAll() throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
         try {
             logger.info(String.format("%s: Starting getAllForSelect service!", logId));
             return this.categoryRepository.findAll()
                     .stream()
-                    .map(e -> {
-                        CategorySelectView map = this.modelMapper.map(e, CategorySelectView.class);
-                        SubcategorySelectView[] sub = this.modelMapper.map(e.getSubcategories(), SubcategorySelectView[].class);
-                        map.setSubcategories(sub);
-                        return map;
-                    })
+                    .map(e -> this.modelMapper.map(e, CategoryModel.class))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             logger.error(String.format("%s: Unexpected getAllForSelect service error!", logId), e);

@@ -5,6 +5,7 @@ import constants from "../../../utils/constants";
 import {Link} from "react-router-dom";
 import {Loading} from "notiflix";
 import frontendUtils from "../../../utils/frontendUtils";
+import messagesUi from "../../../utils/messages-ui";
 
 
 export default class Register extends React.Component {
@@ -102,8 +103,8 @@ export default class Register extends React.Component {
         let splitPhoneNumber = this.state.phoneNumber.split('');
         let firstChar = 0;
         for (const char of splitPhoneNumber) {
-            if ((firstChar === 0 & char !== '0') || (char < '0') || (char > '9')) {
-                frontend.notifyError("Phone number must start with 0 and contains only numbers!")
+            if ((firstChar === 0 && char !== '0') || (char < '0') || (char > '9') || splitPhoneNumber.length !== 10) {
+                frontend.notifyError(messagesUi.PHONE_NUMBER)
                 Loading.Remove();
                 return;
             }
@@ -112,20 +113,20 @@ export default class Register extends React.Component {
         }
 
         if (this.state.password !== this.state.confirmPassword) {
-            frontend.notifyError("Password doesn't match!")
+            frontend.notifyError(messagesUi.PASSWORD_NOT_MATCH)
             Loading.Remove();
         } else {
             backend.REQ_POST(backend.REGISTER_URL, this.state)
                 .then(() => {
                     Loading.Remove();
-                    frontend.notifyInfo("Потребителя е регистриран!")
+                    frontend.notifyInfo(messagesUi.REGISTER_USER_SUCCESS)
                     this.props.history.push(frontend.LOGIN_PATH);})
                 .catch(err => {
                         console.log(err);
                         Loading.Remove();
                         if (err.message === '401') {
                             sessionStorage.clear();
-                            frontendUtils.notifyError("Вашата сесия е истекла, моля влезте отново!");
+                            frontendUtils.notifyError(messagesUi.INVALID_SESSION);
                             this.props.history.push(frontendUtils.LOGIN_PATH);
                         }
                     }

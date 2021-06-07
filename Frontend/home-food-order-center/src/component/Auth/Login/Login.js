@@ -53,7 +53,6 @@ export default class Login extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        Loading.Standard('Loading...',);
         backend.REQ_POST(backend.LOGIN_URL, this.state)
             .then(data => data.json())
             .then((data) => {
@@ -66,8 +65,7 @@ export default class Login extends React.Component {
                 this.props.history.push(frontend.CATALOG_PATH);
             })
             .catch(err => {
-                    console.log(err);
-                    Loading.Remove();
+
                     if (err.message === '401') {
                         sessionStorage.clear();
                         frontendUtils.notifyError("Вашата сесия е истекла, моля влезте отново!");

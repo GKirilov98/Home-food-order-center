@@ -1,6 +1,6 @@
 package dp.home_food_order_center.server.service;
 
-import dp.home_food_order_center.server.data.view.category.CategorySelectView;
+import dp.home_food_order_center.server.data.model.category.CategoryModel;
 import dp.home_food_order_center.server.error.GlobalServiceException;
 
 import java.util.List;
@@ -16,5 +16,5 @@ public interface ICategoryService {
      * @return
      * @throws GlobalServiceException
      */
-    List<CategorySelectView> getAllForSelect() throws GlobalServiceException;
+    List<CategoryModel> getAll() throws GlobalServiceException;
 }

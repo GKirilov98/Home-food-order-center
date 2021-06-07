@@ -156,7 +156,7 @@ export default class AdminProductEdit extends React.Component {
             unitPrice: this.state.unitPrice  != null ?( this.state.unitPrice):( this.state.product.price),
         }
 
-        backend.REQ_POST(backend.ADMIN_PRODUCT_EDIT_PATH + this.state.product.id, bodyData)
+        backend.REQ_POST(backend.BUSINESS_PRODUCT_EDIT_PATH + this.state.product.id, bodyData)
             .then(() => {
                 Loading.Remove();
                 frontend.notifyInfo("Продукта е редактиран успешно!")
@@ -241,7 +241,7 @@ export default class AdminProductEdit extends React.Component {
                                                        name={constants.NAME_NAME}
                                                        onChange={this.handleChange}
                                                        defaultValue={this.state.product.name}
-                                                       min='3' max='25'/>
+                                                       min='3' max='50'/>
                                             </div>
                                         </div>
 

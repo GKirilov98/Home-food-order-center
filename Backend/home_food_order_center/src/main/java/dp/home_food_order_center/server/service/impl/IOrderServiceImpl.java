@@ -35,7 +35,6 @@ public class IOrderServiceImpl implements IOrderService {
         this.productService = productService;
     }
 
-    // TODO: 4/15/2021 Need to be integration tested integration
     @Override
     public String insertOne(Long productId, int quantity) throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
@@ -70,7 +69,6 @@ public class IOrderServiceImpl implements IOrderService {
         }
     }
 
-    // TODO: 4/15/2021 Need to be integration tested integration
     @Override
     public String deleteOneById(Long id) throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();

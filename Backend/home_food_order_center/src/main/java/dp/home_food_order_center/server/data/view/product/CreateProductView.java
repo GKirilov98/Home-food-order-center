@@ -1,6 +1,7 @@
 package dp.home_food_order_center.server.data.view.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dp.home_food_order_center.server.data.view.base.BaseView;
 
 import javax.validation.constraints.*;
 import java.io.Serializable;
@@ -11,7 +12,7 @@ import java.math.BigDecimal;
  * Created by: G.Kirilov
  * On: 3/26/2021 8:53 PM
  */
-public class CreateProductView implements Serializable {
+public class CreateProductView extends BaseView {
     @JsonProperty("category")
     @NotNull
     private Long categoryId;
@@ -26,19 +27,19 @@ public class CreateProductView implements Serializable {
     private String imagePublicId;
     @JsonProperty("name")
     @NotNull
-    @Size(min = 3, max = 25, message = "Name must be between 3 and 25 symbols.")
+    @Size(min = 3, max = 50, message = "Името трябва да бъде с дължина между 3 и 50 символа.")
     private String name;
     @JsonProperty("description")
     @NotNull
-    @Size(min = 50, max = 3999, message = "Name must be between 50 and 3999 symbols.")
+    @Size(min = 50, max = 3999, message = "Описанието трябва да бъде с дължина между 50 и 3999 символа.")
     private String description;
     @JsonProperty("availableQuantity")
     @NotNull
-    @Min(1)
+    @Min(value = 1, message = "Наличното количество трябва да е полужително число.")
     private Long availableQuantity;
     @JsonProperty("unitPrice")
     @NotNull
-    @DecimalMin(value = "0.1")
+    @DecimalMin(value = "0.1", message = "Цената трябва да е по - голяма или равна на 0.10")
     @Digits(integer = 3, fraction = 2)
     private BigDecimal price;
 

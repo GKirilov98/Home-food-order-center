@@ -89,4 +89,21 @@ public interface IUserService {
      * @throws GlobalServiceException
      */
     String deleteUserById(Long id) throws GlobalServiceException;
+
+
+    /**
+     * makeBusinessByUserId - Gives on user with that id role "BUSINESS"
+     * @param id - id of user
+     * @return
+     * @throws GlobalServiceException
+     */
+    String makeBusinessByUserId(Long id) throws GlobalServiceException;
+
+    /**
+     * removeBusinessByUserId - Removes on user with that id role "BUSINESS"
+     * @param id - id of user
+     * @return
+     * @throws GlobalServiceException
+     */
+    String removeBusinessByUserId(Long id) throws GlobalServiceException;
 }

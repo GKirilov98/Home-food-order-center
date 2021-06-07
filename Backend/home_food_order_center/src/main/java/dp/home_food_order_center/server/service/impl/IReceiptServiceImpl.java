@@ -76,7 +76,7 @@ public class IReceiptServiceImpl implements IReceiptService {
         }
     }
 
-    // TODO: 4/15/2021 Needed integration tests
+
     @Override
     public List<ReceiptModel> getShoppingReceiptForCurrUser() throws GlobalServiceException {
         String logId = UUID.randomUUID().toString();
@@ -84,10 +84,9 @@ public class IReceiptServiceImpl implements IReceiptService {
             logger.info(String.format("%s: Starting getReceiptForCurrUserByStatusCode service!", logId));
             Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             Long userId = ((UserDetailsImpl) principal).getId();
-            List<ReceiptEntity> entities = this.receiptRepository.findAllByUserIdAndStatusCode(userId, ReceiptStatusType.SHOPPING);
-            return entities.stream()
-                    .map(e -> this.modelMapper.map(e, ReceiptModel.class))
-                    .collect(Collectors.toList());
+            List<ReceiptModel> result = new ArrayList<>();
+            result.add(this.getNotPaidReceiptByUserId(userId));
+            return result;
         } catch (Exception e) {
             logger.error(String.format("%s: Unexpected getReceiptForCurrUserByStatusCode service error!", logId), e);
             throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected service error!");
@@ -105,6 +104,11 @@ public class IReceiptServiceImpl implements IReceiptService {
             if (receiptEntity == null) {
                 logger.error(String.format("%s: Invalid receiptId! %s", logId, receiptId));
                 throw new GlobalServiceException(logId, "Невалиден receiptId!", "Invalid receiptId!");
+            }
+
+            if (BigDecimal.ZERO.compareTo(receiptEntity.getTotalAmount()) >= 0){
+                logger.error(String.format("%s: Receipt is empty! %s", logId, receiptId));
+                throw new GlobalServiceException(logId, "Количката няма поръчки!", "Receipt is empty!");
             }
 
             String dbAddress = String.format("%s, %s", city, address);
