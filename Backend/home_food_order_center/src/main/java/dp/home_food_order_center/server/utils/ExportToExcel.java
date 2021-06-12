@@ -53,12 +53,68 @@ public class ExportToExcel {
         targetSheet = null;
     }
 
+    public File export(String[] fileNames, String[] titles, List<List<?>> data) throws GlobalServiceException {
+        try {
+            if (data.size() == 0 || data.get(0).size() == 0) {
+                throw new Exception("Липсват данни!");
+            }
+
+            if (data.size() != fileNames.length || data.size() != titles.length) {
+                throw new Exception("Няма съвпадение в данните");
+            }
+
+            String fullZipPath = String.format("%s%s_%s.%s", ROOT_EXPORT_PATH, fileNames[0], logId, TYPE_OF_ZIP);
+            for (int i = 0; i < fileNames.length; i++) {
+                String fileName = fileNames[i];
+                String title = titles[i];
+                List<?> datum = data.get(i);
+
+                boolean firstIteration = true;
+                for (Object e : datum) {
+                    if (firstIteration) {
+                        this.insertHeader(fileName, title, e);
+                        firstIteration = false;
+                    }
+
+                    this.insertCell(e);
+                }
+                String fullPathExcel = String.format("%s%s%s%s%s", ROOT_EXPORT_PATH, logId, File.separator, fileName, TYPE_OF_EXCEL_FILE);
+                this.createExcelFile(fullPathExcel, fileName);
+            }
+
+
+            this.createZipFile(fullZipPath);
+
+            File notCompressedExcel = new File(ROOT_EXPORT_PATH + logId);
+            for (File file : notCompressedExcel.listFiles()) {
+                file.delete();
+            }
+
+            notCompressedExcel.delete();
+            return new File(fullZipPath);
+
+
+//
+//            //deleting excel file
+//            File notCompressedExcel = new File(fullPathExcel);
+//            notCompressedExcel.delete();
+//            notCompressedExcel.getParentFile().delete();
+//
+//            return new File(fullZipPath);
+        } catch (GlobalServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GlobalServiceException(logId, "Грешка при експорт на данни!", e.getMessage(), e);
+        }
+    }
+
 
     public File export(String fileName, String title, List<?> data) throws GlobalServiceException {
         try {
             if (data.size() == 0) {
                 throw new Exception("Липсват данни!");
             }
+
             boolean firstIteration = true;
             for (Object e : data) {
                 if (firstIteration) {
@@ -73,7 +129,7 @@ public class ExportToExcel {
             String fullZipPath = String.format("%s%s_%s.%s", ROOT_EXPORT_PATH, fileName, logId, TYPE_OF_ZIP);
 
             String excelFilePath = this.createExcelFile(fullPathExcel, fileName);
-            this.createZipFile(excelFilePath, fullZipPath, fileName);
+//            this.createZipFile(excelFilePath, fullZipPath, fileName);
 
             //deleting excel file
             File notCompressedExcel = new File(fullPathExcel);
@@ -86,7 +142,6 @@ public class ExportToExcel {
         } catch (Exception e) {
             throw new GlobalServiceException(logId, "Грешка при експорт на данни!", e.getMessage(), e);
         }
-
     }
 
     /**
@@ -240,7 +295,11 @@ public class ExportToExcel {
         logger.info(String.format("%s: Starting createExcelFile method", logId));
         try {
             File file = new File(fullPathExcel);
-            file.getParentFile().mkdirs();
+            File parentFile = file.getParentFile();
+            if (!parentFile.exists()) {
+                parentFile.mkdirs();
+            }
+
             file.createNewFile();
         } catch (Exception e) {
             logger.error(String.format("%s: Error creating excel", logId), e);
@@ -282,28 +341,46 @@ public class ExportToExcel {
     /**
      * createZipFile
      *
-     * @param excelFilePath
-     * @param zipPath
-     * @param fileName
+     * @param zipPath -
      * @throws GlobalServiceException
      */
-    private void createZipFile(String excelFilePath, String zipPath, String fileName) throws GlobalServiceException {
+    private void createZipFile(String zipPath) throws GlobalServiceException {
         try {
             logger.info(String.format("%s: Start createZipFile method", logId));
             FileOutputStream fileOutputStream = new FileOutputStream(zipPath);
             ZipOutputStream zipOut = new ZipOutputStream(fileOutputStream);
-            FileInputStream fileInputStream = new FileInputStream(excelFilePath);
-            ZipEntry zipEntry = new ZipEntry(fileName + TYPE_OF_EXCEL_FILE);
-            zipOut.putNextEntry(zipEntry);
-            byte[] bytes = new byte[1024];
-            int length;
-            while ((length = fileInputStream.read(bytes)) != -1) {
-                zipOut.write(bytes, 0, length);
+            String folder = ROOT_EXPORT_PATH + logId;
+
+            for (File excelFilePath : Objects.requireNonNull(new File(folder).listFiles())) {
+                String fileName = excelFilePath.getName();
+                FileInputStream fileInputStream = new FileInputStream(excelFilePath);
+                ZipEntry zipEntry = new ZipEntry(fileName + TYPE_OF_EXCEL_FILE);
+                zipOut.putNextEntry(zipEntry);
+                byte[] bytes = new byte[1024];
+                int length;
+                while ((length = fileInputStream.read(bytes)) != -1) {
+                    zipOut.write(bytes, 0, length);
+                }
+
+                fileInputStream.close();
             }
 
-            fileInputStream.close();
             zipOut.close();
             fileOutputStream.close();
+
+//            ZipOutputStream zipOut = new ZipOutputStream(fileOutputStream);
+//            FileInputStream fileInputStream = new FileInputStream(excelFilePath);
+//            ZipEntry zipEntry = new ZipEntry(fileName + TYPE_OF_EXCEL_FILE);
+//            zipOut.putNextEntry(zipEntry);
+//            byte[] bytes = new byte[1024];
+//            int length;
+//            while ((length = fileInputStream.read(bytes)) != -1) {
+//                zipOut.write(bytes, 0, length);
+//            }
+//
+//            fileInputStream.close();
+//            zipOut.close();
+//            fileOutputStream.close();
 
         } catch (Exception exc) {
             logger.error(String.format("%s: Unexpected error: %s", logId, exc.getMessage()), exc);

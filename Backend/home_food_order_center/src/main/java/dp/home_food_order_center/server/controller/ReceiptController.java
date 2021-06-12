@@ -63,22 +63,5 @@ public class ReceiptController extends BaseController {
         return ResponseEntity.ok().body(list);
     }
 
-//    @GetMapping("/export/{id}")
-//    public HttpEntity exportReceiptById(@PathVariable Long id) throws GlobalServiceException {
-//        File zipFile = this.receiptService.exportReceiptById(id);
-//        return new FileToHttpEntityUtil().convert(zipFile);
-//    }
 
-//    /**
-//     * getAllReceiptOrByStatus
-//     * @param status
-//     * @return
-//     * @throws GlobalServiceException
-//     */
-//    @GetMapping("/getAll")
-//    public ResponseEntity<?> getAllReceiptOrByStatus(@RequestParam (required = false) String status)
-//            throws GlobalServiceException {
-//        List<ReceiptListView> list = this.receiptService.getAllReceiptOrByStatus(status);
-//        return ResponseEntity.ok().body(list);
-//    }
 }

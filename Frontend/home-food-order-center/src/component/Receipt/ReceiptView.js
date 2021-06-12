@@ -1,6 +1,6 @@
 import React from "react";
 import * as Icon from 'react-bootstrap-icons';
-import {Loading} from "notiflix";
+import {Confirm, Loading} from "notiflix";
 import backend from "../../utils/backendUtils";
 import {Link} from "react-router-dom";
 import frontendUtils from "../../utils/frontendUtils";
@@ -25,42 +25,122 @@ export default class ReceiptView extends React.Component {
 
     handleClick(event) {
         Loading.Standard('Loading...',);
-        backend.REQ_POST(backend.BUSINESS_RECEIPT_PAID_URL + this.state.receipt.id)
-            .then(res => res.json())
-            .then(res => {
-                if (res[0].user.username !== sessionStorage.getItem(constants.USERNAME_KEY_NAME)){
-                    let isBusiness = false;
-                    let isAdmin = false;
-                    sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
-                        .forEach((role) => {
-                            if (role === constants.ROLE_BUSINESS) {
-                                isBusiness = true;
-                            } else if (role === constants.ROLE_ADMIN) {
-                                isAdmin = true;
+        let id = event.target.id;
+        if (id === "delete-button"){
+
+            Confirm.Show( '!!! WARNING !!!', 'Сигурни ли сте, че искате да изтриете тази касова бележка?',
+                'Не', 'Да',
+                () => "",
+                () => {
+                    backend.REQ_POST(backend.BUSINESS_RECEIPT_DELETE_PATH + this.state.receipt.id)
+                        .then(() => {
+                            let isAdmin = false;
+                            for (const string of sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")) {
+                                if (string === constants.ROLE_ADMIN || string === constants.ROLE_BUSINESS){
+                                    isAdmin = true;
+                                    break
+                                }
+                            }
+
+                            frontendUtils.notifyInfo("Касовата бележка е изтрита успешно!");
+                            if (isAdmin){
+                                this.props.history.push(frontendUtils.ADMIN_RECEIPT_LIST_PATH)
                             }
                         })
-                    if (!isBusiness && !isAdmin) {
-                        frontendUtils.notifyError("Нямате необходимите права за достап!");
-                        this.props.history.push(frontendUtils.CATALOG_PATH);
+                        .catch(err => {
+                                Loading.Remove();
+                                if (err.message === '401') {
+                                    sessionStorage.clear();
+                                    frontendUtils.notifyError("Вашата сесия е истекла, моля влезте отново!");
+                                    this.props.history.push(frontendUtils.LOGIN_PATH);
+                                }
+                            }
+                        )
+                } );
+        } else if (id === "paid-button") {
+            backend.REQ_POST(backend.BUSINESS_RECEIPT_PAID_URL + this.state.receipt.id)
+                .then(res => res.json())
+                .then(res => {
+                    if (res[0].user.username !== sessionStorage.getItem(constants.USERNAME_KEY_NAME)) {
+                        let isBusiness = false;
+                        let isAdmin = false;
+                        sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
+                            .forEach((role) => {
+                                if (role === constants.ROLE_BUSINESS) {
+                                    isBusiness = true;
+                                } else if (role === constants.ROLE_ADMIN) {
+                                    isAdmin = true;
+                                }
+                            })
+                        if (!isBusiness && !isAdmin) {
+                            frontendUtils.notifyError("Нямате необходимите права за достап!");
+                            this.props.history.push(frontendUtils.CATALOG_PATH);
+                        }
                     }
-                }
 
 
-                this.setState({
-                    receipt: res[0]
+                    this.setState({
+                        receipt: res[0]
+                    })
+                    Loading.Remove();
                 })
-                Loading.Remove();
-            })
-            .catch(err => {
-                    console.log(err);
+                .catch(err => {
+                        Loading.Remove();
+                        if (err.message === '401') {
+                            sessionStorage.clear();
+                            frontendUtils.notifyError("Вашата сесия е истекла или нямате необходимите права, моля влезте отново!");
+                            this.props.history.push(frontendUtils.LOGIN_PATH);
+                        }
+                    }
+                )
+        } else {
+
+            backend.REQ_GET(backend.BUSINESS_RECEIPT_REPORT_URL + this.state.receipt.id)
+                .then(response => {
+                    const reader = response.body.getReader()
+                    return new ReadableStream({
+                        start(controller) {
+                            return pump();
+                            function pump() {
+                                return reader.read().then(({ done, value }) => {
+                                    // When no more data needs to be consumed, close the stream
+                                    if (done) {
+                                        controller.close();
+                                        return;
+                                    }
+                                    // Enqueue the next data chunk into our target stream
+                                    controller.enqueue(value);
+                                    return pump();
+                                });
+                            }
+                        }
+                    })
+                })
+                .then(stream => new Response(stream))
+                .then(response => response.blob())
+                .then(blob => {
+                    const fileName = "download";
+                        const extension = "zip";
+                    let blobUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.setAttribute('download', `${fileName}.${extension}`);
+                    document.body.appendChild(link);
+                    link.click();
+                    Loading.Remove();
+                })
+                .catch(err =>  {
                     Loading.Remove();
                     if (err.message === '401') {
                         sessionStorage.clear();
                         frontendUtils.notifyError("Вашата сесия е истекла или нямате необходимите права, моля влезте отново!");
                         this.props.history.push(frontendUtils.LOGIN_PATH);
                     }
-                }
-            )
+                } );
+
+
+        }
+
     }
 
     componentDidMount() {
@@ -155,12 +235,12 @@ export default class ReceiptView extends React.Component {
                                                 <div className="my-2">
                                                     <span className="text-600 text-90">Статус:</span> <span
                                                     className="badge badge-warning badge-pill px-25">{
-                                                    this.state.receipt.statusCode === "SEND" ? ("Изпратена") :(
+                                                    this.state.receipt.statusCode === "SEND" ? ("Изпратена") : (
                                                         this.state.receipt.statusCode === "PAID" ? ("Платена") : (
                                                             "Пазаруване"
                                                         )
-                                                        )
-                                                    }</span>
+                                                    )
+                                                }</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -222,7 +302,8 @@ export default class ReceiptView extends React.Component {
 
                                         <hr/>
 
-                                        <Link to={frontendUtils.CATALOG_PATH} className="btn btn-info btn-bold px-4 float-right mt-3 mt-lg-0">
+                                        <Link to={frontendUtils.CATALOG_PATH}
+                                              className="btn btn-info btn-bold px-4 float-right mt-3 mt-lg-0">
                                             Каталог
                                         </Link>
                                         {
@@ -231,13 +312,49 @@ export default class ReceiptView extends React.Component {
                                                     {(role === constants.ROLE_ADMIN || role === constants.ROLE_BUSINESS) &&
                                                     this.state.receipt.statusCode === "SEND" ? (
                                                         <React.Fragment>
-                                                            <button onClick={this.handleClick}
+                                                            <button onClick={this.handleClick} id="paid-button"
                                                                     className="btn btn-warning">Маркирай като Платена
                                                             </button>
                                                         </React.Fragment>
                                                     ) : (
                                                         <React.Fragment/>
                                                     )}
+                                                </React.Fragment>
+                                            })
+                                        }
+
+                                        {
+                                            sessionStorage.getItem('roles').split(',').map((role) => {
+                                                return <React.Fragment>
+                                                    {(role === constants.ROLE_ADMIN || role === constants.ROLE_BUSINESS)
+                                                        ?(
+                                                        <React.Fragment>
+                                                            <button onClick={this.handleClick} id="export-button"
+                                                                    className="btn btn-success m-3">Експорт
+                                                            </button>
+                                                        </React.Fragment>
+                                                    ) : (
+                                                        <React.Fragment/>
+                                                    )}
+                                                </React.Fragment>
+                                            })
+                                        }
+
+
+                                        {
+                                            sessionStorage.getItem('roles').split(',').map((role) => {
+                                                return <React.Fragment>
+                                                    {(
+                                                        (role === constants.ROLE_ADMIN || role === constants.ROLE_BUSINESS)
+                                                    )?(
+                                                            <React.Fragment>
+                                                                <button onClick={this.handleClick} id="delete-button"
+                                                                        className="btn btn-danger m-3">Изтрии
+                                                                </button>
+                                                            </React.Fragment>
+                                                        ) : (
+                                                            <React.Fragment/>
+                                                        )}
                                                 </React.Fragment>
                                             })
                                         }

@@ -64,7 +64,7 @@ public class IOrderRepositoryCustomImpl implements IOrderRepositoryCustom {
     @Override
     @Transactional(rollbackFor = Exception.class, readOnly = false)
     public void deleteOrderCustom(OrderEntity orderEntity) {
-        if (orderEntity.getReceipt().getStatusCode().equals(ReceiptStatusType.SHOPPING)) {
+        if (!orderEntity.getReceipt().getStatusCode().equals(ReceiptStatusType.PAID)) {
             //Връщане на количеството
             ProductEntity product = orderEntity.getProduct();
             product.setAvailableQuantity(product.getAvailableQuantity() + orderEntity.getNeededQuantity());

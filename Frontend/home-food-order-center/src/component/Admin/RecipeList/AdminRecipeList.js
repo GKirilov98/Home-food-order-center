@@ -11,6 +11,7 @@ export default class AdminRecipeList extends React.Component {
         super(props, context);
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleClick = this.handleClick.bind(this);
         this.state = {
             receipts: null,
             statusCode: null,
@@ -40,6 +41,51 @@ export default class AdminRecipeList extends React.Component {
                 props.history.push(frontendUtils.CATALOG_PATH);
             }
         }
+    }
+
+    handleClick(event){
+        backend.REQ_GET(backend.BUSINESS_RECEIPT_REPORT_URL + event.target.id)
+            .then(response => {
+                const reader = response.body.getReader()
+                return new ReadableStream({
+                    start(controller) {
+                        return pump();
+                        function pump() {
+                            return reader.read().then(({ done, value }) => {
+                                // When no more data needs to be consumed, close the stream
+                                if (done) {
+                                    controller.close();
+                                    return;
+                                }
+                                // Enqueue the next data chunk into our target stream
+                                controller.enqueue(value);
+                                return pump();
+                            });
+                        }
+                    }
+                })
+            })
+            .then(stream => new Response(stream))
+            .then(response => response.blob())
+            .then(blob => {
+                const fileName = "download";
+                const extension = "zip";
+                let blobUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.setAttribute('download', `${fileName}.${extension}`);
+                document.body.appendChild(link);
+                link.click();
+                Loading.Remove();
+            })
+            .catch(err =>  {
+                Loading.Remove();
+                if (err.message === '401') {
+                    sessionStorage.clear();
+                    frontendUtils.notifyError("Вашата сесия е истекла или нямате необходимите права, моля влезте отново!");
+                    this.props.history.push(frontendUtils.LOGIN_PATH);
+                }
+            } );
     }
 
     handleSubmit(event) {
@@ -204,7 +250,10 @@ export default class AdminRecipeList extends React.Component {
                                         <td>{value.amount.toFixed(2)} лв.</td>
                                         <td>
                                             <Link to={frontendUtils.RECEIPT_VIEW_PATH + value.id}
-                                                  className="btn btn-info m-0">View</Link>
+                                                  className="btn btn-info m-0">Преглед</Link>
+                                            <button onClick={this.handleClick} id={value.id}
+                                                    className="btn btn-success m-3">Експорт
+                                            </button>
                                         </td>
 
                                     </tr>

@@ -34,6 +34,8 @@ const BUSINESS_USER_LIST_PATH = ROOT_URL + "/business/user/getAll";
 const BUSINESS_PRODUCT_CREATE_URL = ROOT_URL + "/business/product/create";
 const BUSINESS_MAKE_BUSINESS_URL = ROOT_URL + "/business/makeBusiness/";
 const BUSINESS_REMOVE_BUSINESS_URL = ROOT_URL + "/business/removeBusiness/";
+const BUSINESS_RECEIPT_REPORT_URL = ROOT_URL + "/report/receipt/";
+const BUSINESS_RECEIPT_DELETE_PATH = ROOT_URL + "/business/receipt/delete/";
 
 function handleErrors(response) {
     if (!response.ok) {
@@ -152,6 +154,8 @@ const backend = {
     BUSINESS_RECEIPT_PAID_URL,
     BUSINESS_PRODUCT_EDIT_PATH,
     BUSINESS_MAKE_BUSINESS_URL,
-    BUSINESS_REMOVE_BUSINESS_URL
+    BUSINESS_REMOVE_BUSINESS_URL,
+    BUSINESS_RECEIPT_REPORT_URL,
+    BUSINESS_RECEIPT_DELETE_PATH
 };
 export default backend;

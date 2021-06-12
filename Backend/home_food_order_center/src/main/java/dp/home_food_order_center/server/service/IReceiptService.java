@@ -66,4 +66,11 @@ public interface IReceiptService {
      */
     List<ReceiptModel> changeReceiptToPaid(Long id) throws GlobalServiceException;
 
+
+    /**
+     * Delete receipt
+     * @param id
+     * @return
+     */
+    String deleteReceiptById(Long id) throws GlobalServiceException;
 }

@@ -48,34 +48,34 @@ export default class UserEdit extends React.Component {
             'Не', 'Да',
             () => "",
             () => {
-            backend.REQ_POST(backend.ADMIN_USER_DELETE_PATH + this.props.match.params.id)
-                .then(() => {
-                    let isAdmin = false;
-                    for (const string of sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")) {
-                        if (string === constants.ROLE_ADMIN){
-                            isAdmin = true;
-                            break
+                backend.REQ_POST(backend.ADMIN_USER_DELETE_PATH + this.state.user.id)
+                    .then(() => {
+                        let isAdmin = false;
+                        for (const string of sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")) {
+                            if (string === constants.ROLE_ADMIN){
+                                isAdmin = true;
+                                break
+                            }
                         }
-                    }
 
-                    frontendUtils.notifyInfo("Потребителя е изтрит успешно!");
-                    if (isAdmin){
-                        this.props.history.push(frontendUtils.ADMIN_USER_LIST_PATH)
-                    } else {
-                        sessionStorage.clear();
-                        this.props.history.push(frontendUtils.HOME_PATH)
-                    }
-                })
-                .catch(err => {
-                        console.log(err);
-                        Loading.Remove();
-                        if (err.message === '401') {
+                        frontendUtils.notifyInfo("Потребителя е изтрит успешно!");
+                        if (isAdmin){
+                            this.props.history.push(frontendUtils.ADMIN_USER_LIST_PATH)
+                        } else {
                             sessionStorage.clear();
-                            frontendUtils.notifyError("Вашата сесия е истекла, моля влезте отново!");
-                            this.props.history.push(frontendUtils.LOGIN_PATH);
+                            this.props.history.push(frontendUtils.HOME_PATH)
                         }
-                    }
-                )
+                    })
+                    .catch(err => {
+                            console.log(err);
+                            Loading.Remove();
+                            if (err.message === '401') {
+                                sessionStorage.clear();
+                                frontendUtils.notifyError("Вашата сесия е истекла, моля влезте отново!");
+                                this.props.history.push(frontendUtils.LOGIN_PATH);
+                            }
+                        }
+                    )
             } );
     }
 

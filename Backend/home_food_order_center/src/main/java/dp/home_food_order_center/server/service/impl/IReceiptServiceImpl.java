@@ -5,13 +5,13 @@ import dp.home_food_order_center.server.data.entity.*;
 import dp.home_food_order_center.server.data.model.receipt.ReceiptModel;
 import dp.home_food_order_center.server.data.view.receipt.ReceiptListView;
 import dp.home_food_order_center.server.error.GlobalServiceException;
+import dp.home_food_order_center.server.repository.IOrderRepository;
 import dp.home_food_order_center.server.repository.IReceiptRepository;
 import dp.home_food_order_center.server.repository.IUserRepository;
 import dp.home_food_order_center.server.service.IReceiptService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -32,11 +32,13 @@ public class IReceiptServiceImpl implements IReceiptService {
     private final Logger logger = LogManager.getLogger(IReceiptServiceImpl.class);
     private final ModelMapper modelMapper;
     private final IUserRepository userRepository;
+    private final IOrderRepository orderRepository;
     private final IReceiptRepository receiptRepository;
 
-    public IReceiptServiceImpl(ModelMapper modelMapper, IUserRepository userRepository, IReceiptRepository receiptRepository) {
+    public IReceiptServiceImpl(ModelMapper modelMapper, IUserRepository userRepository, IOrderRepository orderRepository, IReceiptRepository receiptRepository) {
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
         this.receiptRepository = receiptRepository;
     }
 
@@ -265,6 +267,53 @@ public class IReceiptServiceImpl implements IReceiptService {
             throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected changeReceiptToPaid service error!");
         } finally {
             logger.info(String.format("%s: Finished changeReceiptToPaid service!", logId));
+        }
+    }
+
+    @Override
+    public String deleteReceiptById(Long id) throws GlobalServiceException {
+        String logId = UUID.randomUUID().toString();
+        //Проверка с базата
+        try {
+            logger.info(String.format("%s: Starting deleteReceiptById service!", logId));
+
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            UserDetailsImpl currLoggedUser = (UserDetailsImpl) principal;
+
+            Set<String> authorities = currLoggedUser.getAuthorities().stream().map(Object::toString)
+                    .collect(Collectors.toSet());
+            if (!authorities.contains(RoleType.ROLE_ADMIN.toString()) &&
+                    !authorities.contains(RoleType.ROLE_BUSINESS.toString())) {
+                if (!currLoggedUser.getId().equals(id)) {
+                    logger.error(String.format("%s: You do not have permission for this operation!", logId));
+                    throw new GlobalServiceException(logId, "Нямате необходимите права за промяна", "You do not have permission for this operation!");
+                }
+            }
+
+            ReceiptEntity receiptEntity = this.receiptRepository.findById(id).orElse(null);
+            if (receiptEntity == null) {
+                logger.error(String.format("%s: Couldn't found receipt with this id! %d", logId, id));
+                throw new GlobalServiceException(logId, "Не мога да намеря касова  с това id", "Could not found receipt with that id");
+            }
+
+            List<OrderEntity> myList = new ArrayList<>(receiptEntity.getOrders());
+            Iterator<OrderEntity> it = myList.iterator();
+
+            while (it.hasNext()) {
+                OrderEntity order = it.next();
+                orderRepository.deleteOrderCustom(order);
+            }
+
+            this.receiptRepository.delete(receiptEntity);
+
+            return "Successfully deleted receipt";
+        } catch (GlobalServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error(String.format("%s: Unexpected deleteReceiptById service error!", logId), e);
+            throw new GlobalServiceException(logId, "Грешка при работа на сървиса!", "Unexpected service error!");
+        } finally {
+            logger.info(String.format("%s: Finished deleteReceiptById service!", logId));
         }
     }
 }

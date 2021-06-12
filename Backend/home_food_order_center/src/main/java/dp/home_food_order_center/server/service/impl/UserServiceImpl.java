@@ -351,7 +351,6 @@ public class UserServiceImpl implements IUserService {
         } finally {
             logger.info(String.format("%s: Finished deleteUserById service!", logId));
         }
-
     }
 
     @Override

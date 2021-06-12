@@ -141,4 +141,16 @@ public class BusinessController {
             put("message", message);
         }});
     }
+
+    /**
+     * Delete receipt By id
+     * @param id
+     * @return
+     * @throws GlobalServiceException
+     */
+    @PostMapping("/receipt/delete/{id}")
+    public  ResponseEntity<?> deleteReceiptById(@PathVariable Long id) throws GlobalServiceException {
+        String message = this.receiptService.deleteReceiptById(id);
+        return ResponseEntity.ok().body(new HashMap<String, String>(){{put("message", message);}} );
+    }
 }
