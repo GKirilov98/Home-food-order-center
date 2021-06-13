@@ -131,7 +131,7 @@ export default class Cart extends React.Component {
                                         <div className="col-sm-1 d-flex align-items-center">
                                             <button className="btn btn-danger w3-hover-border-black "
                                                     onClick={this.handleClick} id={value.id}>
-                                                Delete
+                                                Изтрий
                                             </button>
                                         </div>
                                     </div>
@@ -152,7 +152,7 @@ export default class Cart extends React.Component {
                             <input type="text"
                                    className="form-control border-2 gift-card"
                                    placeholder="discount code/gift card"/>
-                            <button className="btn btn-warning btn-sm ml-2 w3-hover-border-black" type="button">Apply
+                            <button className="btn btn-warning btn-sm ml-2 w3-hover-border-black" type="button">Въведи
                             </button>
                         </div>
                         <hr className="border-dark"/>
@@ -161,7 +161,7 @@ export default class Cart extends React.Component {
                         {this.state.receipt != null ? (
                             <div className="border-cart-summary ">
                                 <div className="pl-2 pb-0 ">
-                                    <h4><strong>Общо дължима сума:</strong> {this.state.receipt.totalAmount}</h4>
+                                    <h4><strong>Общо дължима сума:</strong> {this.state.receipt.totalAmount.toFixed(2)} лв.</h4>
                                 </div>
                             </div>
                         ) : (<span/>)

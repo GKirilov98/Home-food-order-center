@@ -109,19 +109,19 @@ export default class UserProfile extends React.Component {
                                             <span className="nav-link active" id="about-tab" data-toggle="tab"
                                                   role="tab" aria-controls="home" aria-selected="true"
                                             onClick={this.handleClick}>
-                                                About
+                                                Относно
                                             </span>
                                         </li>
                                         <li className="nav-item">
                                             <span className="nav-link " id="receipt-tab" data-toggle="tab"
                                                role="tab" aria-controls="profile" onClick={this.handleClick}
-                                                  aria-selected="false">Receipt</span>
+                                                  aria-selected="false">Списък с касови бележки</span>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
                             { isAdmin ? ( <div className="col-md-2">
-                                <Link to={frontendUtils.USER_EDIT_PATH + this.state.user.username} className="btn btn-warning">Edit</Link>
+                                <Link to={frontendUtils.USER_EDIT_PATH + this.state.user.username} className="btn btn-warning">Редакция</Link>
                             </div>):(<React.Fragment />)}
 
                         </div>

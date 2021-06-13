@@ -42,7 +42,7 @@ export default class UserRecipe extends React.Component {
                                         <h6 className="text-grey">Сума: {value.amount.toFixed(2)}</h6>
                                     </div>
                                     <Link to={frontendUtils.RECEIPT_VIEW_PATH + value.id}
-                                          className="btn btn-warning ">View</Link>
+                                          className="btn btn-info ">Преглед</Link>
                                 </div>
                             }
                             )
@@ -53,16 +53,6 @@ export default class UserRecipe extends React.Component {
                             }
                             </div>
                             </div>
-
-                        {/*<nav aria-label="Page navigation example">*/}
-                        {/*    <ul className="pagination">*/}
-                        {/*        <li className="page-item"><a className="page-link" href="#">Previous</a></li>*/}
-                        {/*        <li className="page-item"><a className="page-link" href="#">1</a></li>*/}
-                        {/*        <li className="page-item"><a className="page-link" href="#">2</a></li>*/}
-                        {/*        <li className="page-item"><a className="page-link" href="#">3</a></li>*/}
-                        {/*        <li className="page-item"><a className="page-link" href="#">Next</a></li>*/}
-                        {/*    </ul>*/}
-                        {/*</nav>*/}
                             </div>
                             );
                         }

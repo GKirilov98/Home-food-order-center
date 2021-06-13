@@ -232,7 +232,7 @@ export default class AdminUserList extends React.Component {
                             </select>
                         </div>
                         <div className="col">
-                            <button type="submit" className="btn w3-hover-light-green w3-green">Search</button>
+                            <button type="submit" className="btn w3-hover-light-green w3-green">Търси</button>
                         </div>
                     </div>
                 </form>
@@ -270,7 +270,7 @@ export default class AdminUserList extends React.Component {
                                     {(isAdmin)?(
                                         <td>
                                             <Link to={frontendUtils.USER_EDIT_PATH + user.username}
-                                                  className="btn btn-warning m-0">Edit</Link>
+                                                  className="btn btn-warning m-0">Ред.</Link>
                                         </td>
                                     ):(
                                         <React.Fragment />
@@ -278,7 +278,7 @@ export default class AdminUserList extends React.Component {
 
                                     <td>
                                         <Link to={frontendUtils.USER_PROFILE_PATH + user.username}
-                                              className="btn btn-info m-0">View</Link>
+                                              className="btn btn-info m-0">Прегл.</Link>
                                     </td>
                                     {isAdmin ? (
                                         user.roles.includes(constants.ROLE_ADMIN) ? (

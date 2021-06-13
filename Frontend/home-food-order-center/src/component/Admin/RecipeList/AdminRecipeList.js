@@ -220,7 +220,7 @@ export default class AdminRecipeList extends React.Component {
                             </select>
                         </div>
                         <div className="col-1">
-                            <button className="btn w3-hover-light-green w3-green">Search</button>
+                            <button className="btn w3-hover-light-green w3-green">Търси</button>
                         </div>
                     </div>
                 </form>

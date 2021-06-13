@@ -122,7 +122,7 @@ export default class ProductDetails extends React.Component {
                             <div className="col border m-3 pb-3">
                                 <form className="text-dark mb-5 form-created" onSubmit={this.handleSubmit}>
                                     <p className="text-dark">Максимално количество: {this.state.product.maxQuantity} бр.</p>
-                                    <input type="number" className="form-control" placeholder="Quantity"
+                                    <input type="number" className="form-control" placeholder="Количество"
                                            min={1} max={this.state.product.maxQuantity} onChange={this.handleChange}/>
                                     <button type="submit" className="btn w3-green w3-hover-blue mt-2">Добави в количка
                                     </button>

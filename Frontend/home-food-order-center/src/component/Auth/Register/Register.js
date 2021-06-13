@@ -215,7 +215,7 @@ export default class Register extends React.Component {
                         <button type="submit" className="btn btn-success btn-lg btn-">Регистрирай</button>
                     </div>
                 </form>
-                <div className="text-center form-control text-dark">Вече имате акоунт?
+                <div className="text-center form-control text-dark">Вече имате акаунт?
                     <Link to={frontend.LOGIN_PATH} className="w3-hover-text-green text-info">Вход</Link>
                 </div>
             </div>
