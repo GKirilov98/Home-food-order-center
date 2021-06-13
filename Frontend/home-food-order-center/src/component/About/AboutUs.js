@@ -13,7 +13,7 @@ export default class AboutUs extends React.Component{
                         Факултетен номер: 17118085 <br />
                         За front-end  е използван React JS <br/>
                         За back-end е използван JAVA Spring <br/>
-                        За база данни се изполва MySQL 8.0<br/>
+                        За база данни се изполва MS SQL Server 2019<br/>
                         Ауторизацията между front-end и back-end става чрез jwt токен<br/>
                         Свързан е с Cloudinary.<br/>
                     </p>

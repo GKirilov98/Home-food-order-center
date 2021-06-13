@@ -82,7 +82,6 @@ export default class Cart extends React.Component {
         backend.REQ_GET(backend.RECEIPT_GET_BY_STATUS_SHOPPING_URL)
             .then(res => res.json())
             .then(res => {
-                debugger;
                 Loading.Remove();
                 this.setState({
                         receipt: res[0]

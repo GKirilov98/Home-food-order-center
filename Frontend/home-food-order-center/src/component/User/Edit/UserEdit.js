@@ -26,57 +26,57 @@ export default class UserEdit extends React.Component {
         if (sessionStorage.getItem(constants.USERNAME_KEY_NAME) == null) {
             props.history.push(frontend.LOGIN_PATH);
         } else {
-            let isBusiness = false;
-            let isAdmin = false;
-            sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
-                .forEach((role) => {
-                    if (role === constants.ROLE_BUSINESS) {
-                        isBusiness = true;
-                    } else if (role === constants.ROLE_ADMIN) {
-                        isAdmin = true;
-                    }
-                })
-            if (!isBusiness && !isAdmin) {
-                frontendUtils.notifyError("Нямате необходимите права за достап!");
-                props.history.push(frontendUtils.CATALOG_PATH);
+            let isCurrUser = sessionStorage.getItem(constants.USERNAME_KEY_NAME) === props.match.params.id
+            if (!isCurrUser) {
+                let isAdmin = false;
+                sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
+                    .forEach((role) => {
+                       if (role === constants.ROLE_ADMIN) {
+                            isAdmin = true;
+                        }
+                    })
+                if (!isAdmin) {
+                    frontendUtils.notifyError("Нямате необходимите права за достап!");
+                    props.history.push(frontendUtils.CATALOG_PATH);
+                }
             }
         }
     }
 
     handleDelete(event) {
-        Confirm.Show( '!!! WARNING !!!', 'Сигурни ли сте, че искате да изтриете този профил?',
+        Confirm.Show('!!! WARNING !!!', 'Сигурни ли сте, че искате да изтриете този профил?',
             'Не', 'Да',
             () => "",
             () => {
-                backend.REQ_POST(backend.ADMIN_USER_DELETE_PATH + this.state.user.id)
-                    .then(() => {
-                        let isAdmin = false;
-                        for (const string of sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")) {
-                            if (string === constants.ROLE_ADMIN){
-                                isAdmin = true;
-                                break
-                            }
-                        }
+                let isAdmin = false;
+                for (const string of sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")) {
+                    if (string === constants.ROLE_ADMIN) {
+                        isAdmin = true;
+                        break
+                    }
+                }
 
-                        frontendUtils.notifyInfo("Потребителя е изтрит успешно!");
-                        if (isAdmin){
+                if (isAdmin) {
+                    backend.REQ_POST(backend.ADMIN_USER_DELETE_PATH + this.state.user.id)
+                        .then(() => {
+                            frontendUtils.notifyInfo("Потребителя е изтрит успешно!");
                             this.props.history.push(frontendUtils.ADMIN_USER_LIST_PATH)
-                        } else {
-                            sessionStorage.clear();
-                            this.props.history.push(frontendUtils.HOME_PATH)
-                        }
-                    })
-                    .catch(err => {
-                            console.log(err);
-                            Loading.Remove();
-                            if (err.message === '401') {
-                                sessionStorage.clear();
-                                frontendUtils.notifyError("Вашата сесия е истекла, моля влезте отново!");
-                                this.props.history.push(frontendUtils.LOGIN_PATH);
+                        })
+                        .catch(err => {
+                                console.log(err);
+                                Loading.Remove();
+                                if (err.message === '401') {
+                                    sessionStorage.clear();
+                                    frontendUtils.notifyError("Вашата сесия е истекла, моля влезте отново!");
+                                    this.props.history.push(frontendUtils.LOGIN_PATH);
+                                }
                             }
-                        }
-                    )
-            } );
+                        )
+                } else {
+                    frontendUtils.notifyError("Нямате необходимите права за достап!");
+                }
+
+            });
     }
 
     handleChange(event) {
@@ -127,6 +127,7 @@ export default class UserEdit extends React.Component {
                 break;
         }
     }
+
     handleSubmit(event) {
         Loading.Standard('Loading...',);
         event.preventDefault();
@@ -150,7 +151,8 @@ export default class UserEdit extends React.Component {
                             imgSrc: res.url,
                             imgPublicId: res.public_id,
                         };
-                    })})
+                    })
+                })
                 .catch(err => {
                         console.log(err);
                         Loading.Remove();
@@ -201,6 +203,7 @@ export default class UserEdit extends React.Component {
                 }
             )
     }
+
     componentDidMount() {
         Loading.Standard('Loading...',);
         let id = this.props.match.params.id;
@@ -231,6 +234,13 @@ export default class UserEdit extends React.Component {
     }
 
     render() {
+        let isAdmin = false;
+        for (const string of sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")) {
+            if (string === constants.ROLE_ADMIN) {
+                isAdmin = true;
+                break
+            }
+        }
         return (
             <div className="container emp-profile">
                 {
@@ -320,13 +330,19 @@ export default class UserEdit extends React.Component {
                                         </div>
                                     </div>
                                 </div>
+                                {
+                                    isAdmin ?(<button type="button" className="btn btn-danger mt-3"
+                                                      onClick={this.handleDelete}>Delete
+                                    </button>):(<React.Fragment />)
+                                }
 
-                                <button type="button" className="btn btn-danger mt-3" onClick={this.handleDelete}>Delete</button>
 
+                                <div className="mb-3">
+                                    <button type="submit" className="btn btn-info mt-3  float-right">
+                                        Save
+                                    </button>
+                                </div>
 
-                                <button type="submit" className="btn btn-info mt-3  float-right ">
-                                    Save
-                                </button>
 
                             </form>
 

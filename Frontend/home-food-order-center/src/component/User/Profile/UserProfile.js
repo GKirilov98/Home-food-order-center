@@ -20,10 +20,28 @@ export default class UserProfile extends React.Component {
         }
     }
 
-    static getDerivedStateFromProps(props, state) {
+    static getDerivedStateFromProps(props) {
         if (sessionStorage.getItem(constants.USERNAME_KEY_NAME) == null) {
-            frontendUtils.notifyError("Моля влезте в системата!");
             props.history.push(frontend.LOGIN_PATH);
+        } else {
+            let isCurrUser = sessionStorage.getItem(constants.USERNAME_KEY_NAME) === props.match.params.id
+            if (!isCurrUser) {
+                let isBusiness = false;
+                let isAdmin = false;
+                debugger;
+                sessionStorage.getItem(constants.USER_ROLES_KEY_NAME).split(",")
+                    .forEach((role) => {
+                        if (role === constants.ROLE_BUSINESS) {
+                            isBusiness = true;
+                        } else if (role === constants.ROLE_ADMIN) {
+                            isAdmin = true;
+                        }
+                    })
+                if (!isBusiness && !isAdmin) {
+                    frontendUtils.notifyError("Нямате необходимите права за достап!");
+                    props.history.push(frontendUtils.CATALOG_PATH);
+                }
+            }
         }
     }
 
